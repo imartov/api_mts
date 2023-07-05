@@ -1,0 +1,17 @@
+{
+   "phone_number":375298766719,
+   "extra_id":"4232j4h89932kjhs",
+   "callback_url":"https://send-dr-here.com",
+   "tag":"Campaign name",
+   "channels":[
+      "sms"
+   ],
+   "channel_options":{
+      "sms":{
+         "text":"privet",
+         "alpha_name":"TEST",
+         "ttl":600
+      }
+   }
+}
+

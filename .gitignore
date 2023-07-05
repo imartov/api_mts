@@ -1,0 +1,11 @@
+# virtualenv
+/api_mts_venv
+api_mts_venv
+*api_mts_venv
+.api_mts_venv
+
+# documentation api mts
+/documentation
+documentation
+*documentation
+.documentation
