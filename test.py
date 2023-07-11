@@ -13,9 +13,9 @@ def sms_sending() -> None:
 
     request_params = {
         'phone_number': 375445285989,
-        'extra_id': '', # what is it?
-        # 'callback_url': "https://send-dr-here.com", # what is?
-        # 'start_time': '2020-12-12 10:10:10+03:00', # not requirement, what is it?
+        # 'extra_id': '', # what is it, not requirement?
+        # 'callback_url': "https://send-dr-here.com", # what is, not requirement?
+        'start_time': '2020-12-12 10:10:10+03:00', # not requirement, what is it?
         'tag': 'debt_collection', # not requirement
         'channels': [
             'sms'
