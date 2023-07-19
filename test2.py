@@ -31,8 +31,8 @@ def sms_sending() -> None:
 # }
 
     url = f'https://api.br.mts.by/1254/json2/simple'
-    resp = requests.post(uarl=url)
-    print("Ответ: ", resp)
+    resp = requests.post(url=url, params=)
+    print("Ответ: ", resp.txt)
 
 
 if __name__ == '__main__':

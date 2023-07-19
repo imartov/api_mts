@@ -1,43 +1,41 @@
+''' для перевода данных в json '''
+import json
 import requests
 
 
-def sms_sending() -> None:
 
-    authentication_params = {
-        'client_id': '1254', # присваивается провайдером
-        # 'extra_id': '? - идентификатор сообщения, указывается заказчиком, не может повторяться, не обязательный аргумент',
-        'alpha_name': 'Alivaria', # присваивается провайдером
-        'login': 'Alivaria_wxP9', # ввыдается администратором платформы'
-        'password': 'tBjAa1' # узнать, актуальный ли пароль'
-    }
+def sms_sending() -> None:
+    ''' отправка сообщения '''
+    # authentication_params = {
+    #     'client_id': '1254', # присваивается провайдером
+    #     # 'extra_id': '? - идентификатор сообщения, указывается заказчиком,
+    #                       не может повторяться, не обязательный аргумент',
+    #     'alpha_name': 'Alivaria', # присваивается провайдером
+    #     'login': 'Alivaria_wxP9', # ввыдается администратором платформы'
+    #     'password': 'tBjAa1' # узнать, актуальный ли пароль'
+    # }
 
     request_params = {
         'phone_number': 375445285989,
-        # 'extra_id': '', # what is it, not requirement?
-        # 'callback_url': "https://send-dr-here.com", # what is, not requirement?
-        'start_time': '2020-12-12 10:10:10+03:00', # not requirement, what is it?
-        'tag': 'debt_collection', # not requirement
         'channels': [
             'sms'
     ],
         'channel_options': {
             'sms': {
-                'text': f'Уважаемый клиент!\nОАО "Пивоваренная компания сообщает, что у вас образовалась просроченная задолженность в размере {3434}".\nПросим оплатить',
-                'alpha_name': authentication_params['alpha_name'],
+                'text': 'Any text',
+                'alpha_name': "Alivaria",
                 'ttl': 300,
         }
 
     }
 }
 
-    url = f'https://api.communicator.mts.by/1254/json2/simple'
-    resp = requests.post(url=url, params=request_params)
-    print(resp)
-
-
-def main():
-    sms_sending()
+    url = 'https://api.communicator.mts.by/1254/json2/simple'
+    # resp = requests.post(url=url, data=json.dumps(request_params))
+    # resp = requests.post(url=url, params=request_params)
+    resp = requests.post(url=url, json=request_params)
+    print(resp.status_code)
 
 
 if __name__ == '__main__':
-    main()
+    sms_sending()
