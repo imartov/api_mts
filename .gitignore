@@ -19,5 +19,5 @@ documentation/
 env
 
 # data for sms-sending
-test_data.py
+test_data.json
 
