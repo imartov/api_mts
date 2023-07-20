@@ -1,6 +1,7 @@
 import json, os
 from dotenv import load_dotenv
-from main import send_message
+from main import ApiMTS
+from create_extra_id import create_extra_id
 
 
 def get_data() -> None:
@@ -16,11 +17,22 @@ def get_data() -> None:
     load_dotenv()
     ALPHA_NAME = os.getenv("ALPHA_NAME")
 
+    # generate extra_id and set to recipients list
+    extra_id_list = []
+    for recipient in request_params["recipients"]:
+        extra_id = create_extra_id()
+        extra_id_list.append(extra_id)
+        recipient["extra_id"] = extra_id
+
     # set text message and alfa name
     request_params["channel_options"]["sms"]["text"] = text_message
     request_params["channel_options"]["sms"]["alpha_name"] = ALPHA_NAME
 
-    send_message(request_params=request_params)
+    # send messages and get reports
+    sms = ApiMTS()
+    sms.send_messages(request_params=request_params)
+    sms.get_report(extra_id_list=extra_id_list)
+
 
 if __name__ == "__main__":
     get_data()

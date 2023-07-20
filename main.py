@@ -3,49 +3,35 @@ import requests
 from dotenv import load_dotenv
 
 
-def send_message(request_params:dict) -> None:
-    ''' отправка отдельного сообшщения sms '''
+class ApiMTS:
+    ''' Class for sending messages and getting detail reports '''
 
-    # get environment variables
-    load_dotenv()
-    CLIENT_ID = os.getenv("CLIENT_ID")
-    LOGIN = os.getenv("LOGIN")
-    PASSWORD = os.getenv("PASSWORD")
-    # ALPHA_NAME = os.getenv("ALPHA_NAME")
+    def __init__(self) -> None:
+        
+        # get environment variables
+        load_dotenv()
+        self.CLIENT_ID = os.getenv("CLIENT_ID")
+        self.LOGIN = os.getenv("LOGIN")
+        self.PASSWORD = os.getenv("PASSWORD")
+        
 
-    # url for api request
-    url = f"https://api.communicator.mts.by/{CLIENT_ID}/json2/broadcast/sync"
+    def send_messages(self, request_params:dict) -> None:
+        ''' run sms sending '''
+        url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync"
 
-    # request_params = {
-    #     "recipients": [
-    #         {
-    #             "phone_number": 375445285989,
-    #             "debtor_name": "Александр личный",
-    #             "debt_amount": 500
-    #         },
-    #         {
-    #             "phone_number": 375295001701,
-    #             "debtor_name": "Александр рабочий",
-    #             "debt_amount": 1000
-    #         },
-    #     ],
-    #     "tag": "Debt collection",
-    #     "channels": [
-    #         "sms"
-    #     ],
-    #     "channel_options": {
-    #         "sms": {
-    #             "text": text_message,
-    #             "alpha_name": ALPHA_NAME,
-    #             "ttl": 300
-    #         }
-    #     }
-    # }
+        # sending sms-messages
+        resp = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
+        print("HTTP code of sms-sending: ", resp.status_code)
 
-    # sending sms-messages
-    resp = requests.post(url=url, json=request_params, auth=(LOGIN, PASSWORD))
-    print(resp.status_code)
+
+    def get_report(self, extra_id_list:list) -> None:
+        ''' get detail report '''
+        for extra_id in extra_id_list:
+            url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/advanced"
+            resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+            print(resp)
 
 
 if __name__ == "__main__":
-    send_message()
+    p = ApiMTS()
+    p.send_messages()
