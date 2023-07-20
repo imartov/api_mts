@@ -1,0 +1,45 @@
+{
+    "recipients": [
+        {
+            "phone_number": 375295005090,
+            "debtor_name": "Татьяны Дробовой (рабочий)",
+            "debt_amount": 500
+        },
+        {
+            "phone_number": 375293584761,
+            "debtor_name": "Татьяны Дробовой (личный)",
+            "debt_amount": 1000
+        },
+        {
+            "phone_number": 375295000879,
+            "debtor_name": "Екатерины Белевич (рабочий)",
+            "debt_amount": 1500
+        },
+        {
+            "phone_number": 375297851212,
+            "debtor_name": "Екатерины Белевич (личный)",
+            "debt_amount": 2000
+        },
+        {
+            "phone_number": 375445285989,
+            "debtor_name": "Александра Козырева (личный)",
+            "debt_amount": 2500
+        },
+        {
+            "phone_number": 375295001701,
+            "debtor_name": "Александра Козырева (рабочий)",
+            "debt_amount": 3000
+        }
+    ],
+    "tag": "Debt collection",
+    "channels": [
+        "sms"
+    ],
+    "channel_options": {
+        "sms": {
+            "text": "None",
+            "alpha_name": "None",
+            "ttl": 300
+        }
+    }
+}

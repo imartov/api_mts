@@ -12,5 +12,12 @@ documentation
 .documentation
 documentation/
 
+# virtualenv variables
+.env
+/.env
+*.env
+env
 
-requirements.txt
+# data for sms-sending
+test_data.py
+
