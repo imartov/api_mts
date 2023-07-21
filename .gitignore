@@ -26,4 +26,8 @@ test_data.json
 
 #sent messages
 sent_messages/
+/sent_messages
+sent_messages
+*sent_messages
+.sent_messages
 
