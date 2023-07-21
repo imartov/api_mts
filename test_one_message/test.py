@@ -17,19 +17,21 @@ class ApiMTS:
 
     def send_messages(self, request_params:dict) -> None:
         ''' run sms sending '''
-        url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync"
+        url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/simple"
 
         # sending sms-messages
         resp = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
-        print("HTTP code of sms-sending: ", resp.status_code)
+        print("\nResponse: ")
+        print("1. Response json: ", resp.json())
+        print("2. HTTP code of sms-sending: ", resp.status_code)
 
 
-    def get_report(self, extra_id_list:list) -> None:
+    def get_report(self, extra_id:list) -> None:
         ''' get detail report '''
-        for extra_id in extra_id_list:
-            url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/advanced"
-            # resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
-            # print(resp)
+        url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/advanced"
+        resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+        print("\nReport: ")
+        print(resp)
 
 
 if __name__ == "__main__":
