@@ -6,7 +6,7 @@ class FileOperations:
     ''' class for save request params of sent messages '''
     def __init__(self) -> None:
         self.today = date.today().strftime("%d/%m/%Y").replace("/", "_")
-        self.path = "test_one_message\\sent_messages"
+        self.path = "sent_messages"
         self.file_name = self.today + ".json"
         self.full_file_name = self.path + "\\" + self.file_name
         self.messages_list = []

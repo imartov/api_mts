@@ -15,13 +15,14 @@ class ApiMTS:
         self.PASSWORD = os.getenv("PASSWORD")
         
 
-    def send_messages(self, request_params:dict) -> None:
+    def send_messages(self, request_params:dict) -> int:
         ''' run sms sending '''
         url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync"
 
         # sending sms-messages
         resp = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
         print("HTTP code of sms-sending: ", resp.status_code)
+        return int(resp.status_code)
 
 
     def get_report(self, extra_id_list:list) -> None:
