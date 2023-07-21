@@ -24,3 +24,6 @@ test_data.json
 .test_data.json
 *test_data.json
 
+#sent messages
+sent_messages/
+
