@@ -28,12 +28,25 @@ def get_data() -> None:
     request_params["channel_options"]["sms"]["text"] = text_message
     request_params["channel_options"]["sms"]["alpha_name"] = ALPHA_NAME
 
-    # send messages and get reports
-    sms = ApiMTS()
-    if sms.send_messages(request_params=request_params) == 200:
-        FileOperations().save_request_params(request_params=request_params)
+    # send messages
+    sms = ApiMTS().send_messages(request_params=request_params)
 
-    sms.get_report(extra_id_list=extra_id_list)
+    # save request params
+    if sms["http_code"] == 200:
+        save_request_params = FileOperations(path_to_folder="sent_messages\\request_params")
+        save_request_params.save_data(request_params=request_params)
+    else:
+        save_request_params = FileOperations(path_to_folder="sent_messages\\request_params_error")
+        save_request_params.save_data(request_params=request_params)
+
+    # save response data
+    save_response_data = FileOperations(path_to_folder="sent_messages\\response_data")
+    save_response_data.save_data(sms["resp_json"])
+
+    # sms.get_report(extra_id_list=extra_id_list)
+
+#TODO: add delete data after month
+# TODO: delete sync and do report-request
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import json, os
 from dotenv import load_dotenv
 from test import ApiMTS
-from utils import create_extra_id
+from utils import create_extra_id, FileOperations
 
 
 def get_data() -> None:
@@ -25,15 +25,11 @@ def get_data() -> None:
     request_params["channel_options"]["sms"]["text"] = text_message
     request_params["channel_options"]["sms"]["alpha_name"] = ALPHA_NAME
 
-    print(request_params)
-    print(extra_id)
-
-
-
     # send messages and get reports
     sms = ApiMTS()
-    sms.send_messages(request_params=request_params)
-    sms.get_report(extra_id=extra_id)
+    if sms.send_messages(request_params=request_params) == 200:
+        save_data = FileOperations.save_request_params(request_params=request_params)
+        sms.get_report(extra_id=extra_id)
 
 
 if __name__ == "__main__":
