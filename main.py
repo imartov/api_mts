@@ -1,4 +1,4 @@
-import os
+import os, json
 import requests
 from dotenv import load_dotenv
 
@@ -27,17 +27,35 @@ class ApiMTS:
         return {"http_code": int(resp.status_code), "resp_json": resp.json()}
 
 
-    def get_report(self, extra_id_list:list) -> None:
-        ''' get detail report '''
-        for extra_id in extra_id_list:
-            url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/advanced"
-            resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
-            print("\nReport request: ")
-            print("1. HTTP code of report request: ", resp.status_code)
-            print("2. Return data: ", resp.json())
-            print(resp)
+    def get_report_by_message_id(self, path_to_file:str) -> None:
+        ''' get detail report by message_id'''
+        with open(path_to_file, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        reports_list = []
+        for message_delivery in data:
+            for message in message_delivery["messages"]:
+                message_id = message["message_id"]
+
+                url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/{message_id}/advanced"
+                resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+                reports_list.append(resp.json())
+                print("\nReport request: ")
+                print("1. HTTP code of report request: ", resp.status_code)
+                print("2. Return data: ", resp.json())
+        return reports_list
+
+
+    # def get_report_by_message_id(self, message_id:str) -> None:
+    #     ''' get detail report '''
+    #     url = f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/{message_id}/advanced"
+    #     resp = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+    #     print("\nReport request: ")
+    #     print("1. HTTP code of report request: ", resp.status_code)
+    #     print("2. Return data: ", resp.json())
+    #     print(resp)
 
 
 if __name__ == "__main__":
     p = ApiMTS()
-    p.send_messages()
+    p.get_report_by_message_id(path_to_file="sent_messages\\response_data\\23_07_2023.json")
