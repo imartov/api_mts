@@ -34,14 +34,14 @@ def get_data() -> None:
     # save request params
     if sms["http_code"] == 200:
         save_request_params = FileOperations(path_to_folder="sent_messages\\request_params")
-        save_request_params.save_data(request_params=request_params)
+        save_request_params.save_data(data=request_params)
     else:
         save_request_params = FileOperations(path_to_folder="sent_messages\\request_params_error")
-        save_request_params.save_data(request_params=request_params)
+        save_request_params.save_data(data=request_params)
 
     # save response data
     save_response_data = FileOperations(path_to_folder="sent_messages\\response_data")
-    save_response_data.save_data(sms["resp_json"])
+    save_response_data.save_data(data=sms["resp_json"])
 
     # sms.get_report(extra_id_list=extra_id_list)
 
