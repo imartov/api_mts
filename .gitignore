@@ -31,4 +31,7 @@ sent_messages
 *sent_messages
 .sent_messages
 
+# __pycache__
 __pycache__/
+__pycache__
+/__pycache__
