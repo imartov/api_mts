@@ -1,6 +1,6 @@
 import json, os
 from dotenv import load_dotenv
-from main import ApiMTS
+from api_mts import ApiMTS
 from utils import create_extra_id, FileOperations
 
 
@@ -30,7 +30,7 @@ def get_data() -> None:
 
     # send messages
     message = ApiMTS()
-    send_messages = send_messages(request_params=request_params)
+    send_messages = message.send_messages_broadcast_sync(request_params=request_params)
 
     # create instance of FileOperations
     file_operations = FileOperations()
