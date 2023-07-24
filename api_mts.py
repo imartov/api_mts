@@ -23,12 +23,12 @@ class ApiMTS:
     def get_url(self, by:str, send_message=False, get_report=False, job_id=None, message_id=None, extra_id=None) -> str:
         ''' method for getting url '''
         urls_send_messages = {
-                "mass_broadcast_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync",
-                "mass_broadcast": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast",
-                "mass_batch_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch/sync",
-                "mass_batch": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch",
-                "one_message": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/simple"
-            }
+            "mass_broadcast_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync",
+            "mass_broadcast": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast",
+            "mass_batch_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch/sync",
+            "mass_batch": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch",
+            "one_message": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/simple"
+        }
         urls_get_reports = {
             "job_id": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/job/status/{job_id}",
             "message_id_advanced": f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/{message_id}/advanced",
@@ -44,7 +44,6 @@ class ApiMTS:
 
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' method for send messages as one as mass '''
-        
         url = self.get_url(send_message=True, by=by)
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
         return {"http_code": int(response.status_code), "response_json": response.json()}
@@ -52,13 +51,12 @@ class ApiMTS:
 
     def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
         ''' method for get reports '''
-        
         url = self.get_url(get_report=True, by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
         response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
         return {"http_code": int(response.status_code), "response_json": response.json()}
     
 
-    def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict) -> None:
+    def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict) -> dict:
         ''' the popular request method'''
         message = self.send_message(by="mass_broadcast", request_params=request_params)
         if message["http_code"] == 200:
@@ -82,7 +80,7 @@ class ApiMTS:
                 message_id_list.append(message["message_id"])
             report_list = []
             for message_id in message_id_list:
-                report = self.get_report(by="message_id", message_id=message_id)
+                report = self.get_report(by="message_id_advanced", message_id=message_id)
                 report_list.append(report["response_json"])
             return {"resp_message": message_resp_json, "resp_report": report_list}
         else:

@@ -30,7 +30,7 @@ def get_data() -> None:
 
     # send messages
     message = ApiMTS()
-    send_messages = message.send_messages_broadcast_sync(request_params=request_params)
+    send_messages = message.send_broadcast_mass_messages_and_get_report_by_job_id(request_params=request_params)
 
     # create instance of FileOperations
     file_operations = FileOperations()

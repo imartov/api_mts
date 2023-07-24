@@ -37,14 +37,19 @@ def create_extra_id() -> str:
     return str(uuid.uuid4())
 
 
-if __name__ == "__main__":
-    p = FileOperations()
-    data = [
-        {1: "data1"},
-        {2: "data2"},
-        {3: "data3"}
-    ]
+def make_valid_phone_number(phone_number:str) -> int:
+    ''' method gets any phone number and change
+    it to valid phone number for API MTS '''
+    valid_phone_number = ''
+    for digit in phone_number:
+        if digit.isdigit():
+            valid_phone_number += digit
+        
+    valid_phone_number = valid_phone_number[-1:-9] # TODO: fix
+    # valid_phone_number = "375" + valid_phone_number
+    print(valid_phone_number)
 
-    for i in data:
-        p.save_data(i)
+
+if __name__ == "__main__":
+    make_valid_phone_number(phone_number="8-029-528-59-89")
     
