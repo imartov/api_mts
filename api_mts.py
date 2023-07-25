@@ -74,7 +74,9 @@ class ApiMTS:
         if message["http_code"] == 200:
             message_resp_json = message["response_json"]
             job_id = message_resp_json["job_id"].strip()
-            report = self.get_report(by="job_id", job_id=job_id)            
+            report = self.get_report(by="job_id", job_id=job_id)
+            print("\nresp_message", message_resp_json)
+            print("resp_report", report["response_json"])
             return {"resp_message": message_resp_json, "resp_report": report["response_json"]}
         else:
             print("\nSomething is going wrong: ")

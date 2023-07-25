@@ -41,7 +41,6 @@ def get_data() -> None:
     file_operations.save_data(data=send_messages["resp_report"], path_to_folder="sent_messages\\reports")
 
 # TODO: add delete data after month
-# TODO: delete sync and do report-request
 
 
 if __name__ == "__main__":

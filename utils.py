@@ -9,6 +9,7 @@ class FileOperations:
         self.file_name = self.today + ".json"
         self.data_list = []
 
+
     def save_data(self, data, path_to_folder:str) -> None:
         ''' defining if file exists and add current time '''
         data["time"] = datetime.datetime.now().strftime('%H:%M:%S')
@@ -19,10 +20,13 @@ class FileOperations:
         else:
             self.next_save_data(data, full_file_name=full_file_name)
 
+
     def save_file(self, data_list:list, full_file_name:str) -> None:
         ''' save list to file and run if file doesn't exist'''
         with open(full_file_name, "w", encoding="utf-8") as file:
             json.dump(data_list, file, ensure_ascii=False, indent=4)
+        self.data_list = []
+
 
     def next_save_data(self, data, full_file_name:str) -> None:
         ''' method opens exist file and rewrite it by adding new data '''
