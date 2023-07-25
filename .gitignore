@@ -46,3 +46,8 @@ debug.log
 # zip files
 *.zip
 .zip
+
+# text message
+text_message.txt
+/text_message.txt
+*text_message.txt
