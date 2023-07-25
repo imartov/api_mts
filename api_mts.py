@@ -7,7 +7,6 @@ from loguru import logger
 # add logger
 logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='10 KB', compression='zip')
 
-@logger.catch()
 class ApiMTS:
     ''' Class for sending messages and getting reports '''
     
@@ -42,6 +41,7 @@ class ApiMTS:
             return urls_get_reports[by]
 
 
+    @logger.catch()
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' method for send messages as one as mass '''
         url = self.get_url(send_message=True, by=by)
@@ -90,5 +90,4 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    p = ApiMTS()
-    p.get_report(by="message_id_advanced", message_id=123456789)
+    p = ApiMTS().send_message(by="mass_batch_sync", request_params={"key", "value"})
