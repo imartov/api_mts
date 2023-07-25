@@ -35,3 +35,8 @@ sent_messages
 __pycache__/
 __pycache__
 /__pycache__
+
+# debug file
+debug.log
+.log
+/debug.log
