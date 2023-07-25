@@ -23,6 +23,8 @@ test_data.json
 /test_data.json
 .test_data.json
 *test_data.json
+test_data/
+test_data
 
 #sent messages
 sent_messages/
@@ -40,3 +42,7 @@ __pycache__
 debug.log
 .log
 /debug.log
+
+# zip files
+*.zip
+.zip

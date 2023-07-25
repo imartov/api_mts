@@ -1,4 +1,4 @@
-import os, json
+import os, json, time
 import requests
 from dotenv import load_dotenv
 from loguru import logger
@@ -49,10 +49,22 @@ class ApiMTS:
         return {"http_code": int(response.status_code), "response_json": response.json()}
     
 
+    @logger.catch()
     def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
         ''' method for get reports '''
         url = self.get_url(get_report=True, by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
-        response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+        right_resp = False
+        seconds = 0
+        while not right_resp:
+            if seconds >= 120:
+                break
+            else:      
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+                if int(response.status_code) == 200:
+                    right_resp = True
+                else:
+                    seconds += 2
+                    time.sleep(2)
         return {"http_code": int(response.status_code), "response_json": response.json()}
     
 
@@ -61,13 +73,15 @@ class ApiMTS:
         message = self.send_message(by="mass_broadcast", request_params=request_params)
         if message["http_code"] == 200:
             message_resp_json = message["response_json"]
-            job_id = message_resp_json["job_id"]
-            report = self.get_report(by="job_id", job_id=job_id)
+            job_id = message_resp_json["job_id"].strip()
+            report = self.get_report(by="job_id", job_id=job_id)            
             return {"resp_message": message_resp_json, "resp_report": report["response_json"]}
         else:
             print("\nSomething is going wrong: ")
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
+            # TODO: notice to phone
+            # TODO: fix saving request params to response data
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
@@ -87,7 +101,16 @@ class ApiMTS:
             print("\nSomething is going wrong: ")
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
+            # TODO: notice to phone
 
 
 if __name__ == "__main__":
-    p = ApiMTS().send_message(by="mass_batch_sync", request_params={"key", "value"})
+    p = ApiMTS()
+    # print("\nMain:")
+    # print(p["http_code"])
+    # print(p["response_json"])
+
+    
+    resp = requests.get(url="https://api.communicator.mts.by/1254/json2/job/status/4b7f9d84-2ae4-11ee-8bb1-0050569d4780",
+                        auth=(p.LOGIN, p.PASSWORD))
+    print(resp.json())

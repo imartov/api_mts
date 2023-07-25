@@ -13,11 +13,11 @@ class FileOperations:
         ''' defining if file exists and add current time '''
         data["time"] = datetime.datetime.now().strftime('%H:%M:%S')
         full_file_name = path_to_folder + "\\" + self.file_name
-        if self.file_name not in os.listdir(self.path):
+        if self.file_name not in os.listdir(path_to_folder):
             self.data_list.append(data)
             self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
-            self.next_save_data(data)
+            self.next_save_data(data, full_file_name=full_file_name)
 
     def save_file(self, data_list:list, full_file_name:str) -> None:
         ''' save list to file and run if file doesn't exist'''
@@ -25,7 +25,7 @@ class FileOperations:
             json.dump(data_list, file, ensure_ascii=False, indent=4)
 
     def next_save_data(self, data, full_file_name:str) -> None:
-        ''' run if file exists '''
+        ''' method opens exist file and rewrite it by adding new data '''
         with open(full_file_name, "r", encoding="utf-8") as file:
             self.data_list = json.load(file)
         self.data_list.append(data)
@@ -51,6 +51,7 @@ def make_valid_phone_number(phone_number:str):
         return valid_phone_number
     elif len(valid_phone_number) <= 8:
         print("\nТелефонный номер содержит некорректный код оператора")
+        # TODO: notice to phone
         return None
 
 
