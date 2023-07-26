@@ -2,7 +2,7 @@ import os, json, time
 import requests
 from dotenv import load_dotenv
 from loguru import logger
-from utils import notice_exception
+# from utils import notice_exception
 
 
 # add logger
@@ -20,26 +20,18 @@ class ApiMTS:
         self.PASSWORD = os.getenv("PASSWORD")
 
 
-    def get_url(self, by:str, send_message=False, get_report=False, job_id=None, message_id=None, extra_id=None) -> str:
-        ''' method for getting url '''
-        urls_send_messages = {
-            "mass_broadcast_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast/sync",
-            "mass_broadcast": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/broadcast",
-            "mass_batch_sync": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch/sync",
-            "mass_batch": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/batch",
-            "one_message": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/simple"
-        }
+    def get_url(self, by:str, job_id=None, message_id=None, extra_id=None) -> str:
+        ''' method for get url '''
+        load_dotenv()
         urls_get_reports = {
-            "job_id": f"https://api.communicator.mts.by/{self.CLIENT_ID}/json2/job/status/{job_id}",
-            "message_id_advanced": f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/{message_id}/advanced",
-            "message_id_simple": f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/{message_id}/simple",
-            "extra_id_advanced": f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/advanced",
-            "extra_id_simple": f"https://api.communicator.mts.by/{self.CLIENT_ID}/dr/external/{extra_id}/simple"
+            "job_id": os.getenv("GR_JOB_ID").format(client_id=self.CLIENT_ID, job_id=job_id),
+            "message_id_advanced": os.getenv("GR_MESSAGE_ID_ADVANCED").format(client_id=self.CLIENT_ID, message_id=message_id),
+            "message_id_simple": os.getenv("GR_MESSAGE_ID_SIMPLE").format(client_id=self.CLIENT_ID, message_id=message_id),
+            "extra_id_advanced": os.getenv("GR_EXTRA_ID_ADVANCED").format(client_id=self.CLIENT_ID, extra_id=extra_id),
+            "extra_id_simple": os.getenv("GR_EXTRA_ID_SIMPLE").format(client_id=self.CLIENT_ID, extra_id=extra_id)
         }
-        if send_message:
-            return urls_send_messages[by]
-        elif get_report:
-            return urls_get_reports[by]
+        return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
+        # TODO: get active params of method, maybe __namemethod__
 
 
     @logger.catch()
@@ -130,4 +122,5 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    pass
+    p = ApiMTS().get_url(by="SM_MASS_BROADCAST_SYNC")
+    print(p)
