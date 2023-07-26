@@ -46,10 +46,17 @@ class FileOperations:
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
 
-    def save_data_using_popular_api_methods():
+    def save_data_using_popular_api_methods(self, resp_message=None, resp_report=None, request_params=None) -> None:
         ''' this method saves data that return after using
          popular methods in api_mts.py '''
-        pass
+        load_dotenv()
+        file_operations = FileOperations()
+        if resp_message:
+            file_operations.save_data(data=resp_message, path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
+        if resp_report:
+            file_operations.save_data(data=resp_report, path_to_folder=os.getenv("SAVE_REPORTS"))
+        if request_params:
+            file_operations.save_data(data=request_params, path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
 
 
     def delete_file(self, paths_to_folders:list, count_days=30) -> None:
@@ -69,19 +76,23 @@ def create_extra_id() -> str:
 def make_valid_phone_number(phone_number:str):
     ''' method gets any phone number and change
     it to valid phone number for API MTS '''
-    valid_phone_number = ''
-    for digit in phone_number:
-        if digit.isdigit():
-            valid_phone_number += digit
-        
-    if len(valid_phone_number) >= 9:
-        valid_phone_number = valid_phone_number[-1:-10:-1][::-1]
-        valid_phone_number = "375" + valid_phone_number
-        return valid_phone_number
-    elif len(valid_phone_number) <= 8:
-        print("\nТелефонный номер содержит некорректный код оператора")
-        # TODO: notice to phone
-        return None
+    try:
+        valid_phone_number = ''
+        for digit in phone_number:
+            if digit.isdigit():
+                valid_phone_number += digit
+            
+        if len(valid_phone_number) >= 9:
+            valid_phone_number = valid_phone_number[-1:-10:-1][::-1]
+            valid_phone_number = "375" + valid_phone_number
+            return valid_phone_number
+        elif len(valid_phone_number) <= 8:
+            text_exteption = "Телефонный номер содержит некорректный код оператора"
+            notice_exception(text_exception=text_exteption)
+            return None
+    except Exception as text_exteption:
+        notice_exception(text_exception=text_exteption)
+        # TODO: message to email?
 
 
 def notice_exception(text_exception:str) -> None:
@@ -90,6 +101,7 @@ def notice_exception(text_exception:str) -> None:
     load_dotenv()
     with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE"), "r", encoding="utf-8") as file:
         text_message = file.read()
+        text_message = text_message.format(my_exception=text_exception)
     
     with open(os.getenv("NOTICE_EXCEPTION_REQUEST_PARAMS"), "r", encoding="utf-8") as file:
         request_params = json.load(file)
@@ -99,22 +111,15 @@ def notice_exception(text_exception:str) -> None:
         alpha_name = os.getenv("ALPHA_NAME")
         request_params["channel_options"]["sms"]["text"] = text_message
         request_params["channel_options"]["sms"]["alpha_name"] = alpha_name
-        request_params["channel_options"]["viber"]["text"] = text_message
-        request_params["channel_options"]["viber"]["alpha_name"] = alpha_name
 
     message = ApiMTS().send_one_message_and_get_report_by_message_id(request_params=request_params)
 
     file_operations = FileOperations()
-    file_operations.save_data(data=request_params, path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
-    file_operations.save_data(data=message["resp_message"], path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
-    file_operations.save_data(data=message["resp_report"], path_to_folder=os.getenv("SAVE_REPORTS"))
+    file_operations.save_data_using_popular_api_methods(resp_message=message["resp_message"],
+                                                        resp_report=message["resp_report"],
+                                                        request_params=request_params)
 
 
 if __name__ == "__main__":
-    paths_to_folders = [
-        "a\\aa",
-        "b\\bb",
-        "c\\cc"
-    ]
-    p = FileOperations().delete_file(paths_to_folders=paths_to_folders)
+    pass
     

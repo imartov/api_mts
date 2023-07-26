@@ -34,11 +34,9 @@ def get_data() -> None:
 
     # create instance of FileOperations
     file_operations = FileOperations()
-
-    # save request params, response data and reports data
-    file_operations.save_data(data=request_params, path_to_folder="sent_messages\\request_params")
-    file_operations.save_data(data=send_messages["resp_message"], path_to_folder="sent_messages\\response_data")
-    file_operations.save_data(data=send_messages["resp_report"], path_to_folder="sent_messages\\reports")
+    file_operations.save_data_using_popular_api_methods(resp_message=message["resp_message"],
+                                                        resp_report=message["resp_report"],
+                                                        request_params=request_params)
 
 # TODO: add delete data after month
 
