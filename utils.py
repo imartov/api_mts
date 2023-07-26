@@ -1,5 +1,7 @@
 import uuid, os, json
 import datetime
+from dotenv import load_dotenv
+from api_mts import ApiMTS
 
 
 class FileOperations:
@@ -74,6 +76,31 @@ def make_valid_phone_number(phone_number:str):
         print("\nТелефонный номер содержит некорректный код оператора")
         # TODO: notice to phone
         return None
+
+
+def notice_exception(text_exception:str) -> None:
+    ''' this method sends to defined phone number notice 
+     abut exceptions during run key methods '''
+    load_dotenv()
+    with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE"), "r", encoding="utf-8") as file:
+        text_message = file.read()
+    
+    with open(os.getenv("NOTICE_EXCEPTION_REQUEST_PARAMS"), "r", encoding="utf-8") as file:
+        request_params = json.load(file)
+
+        request_params["phone_number"] = int(os.getenv("NOTICE_EXCEPTION_PHONE_NUMBER"))
+        request_params["extra_id"] = create_extra_id()
+        alpha_name = os.getenv("ALPHA_NAME")
+        request_params["channel_options"]["sms"]["text"] = text_message
+        request_params["channel_options"]["sms"]["alpha_name"] = alpha_name
+        request_params["channel_options"]["viber"]["text"] = text_message
+        request_params["channel_options"]["viber"]["alpha_name"] = alpha_name
+
+    message = ApiMTS().send_message(by="one_message", request_params=request_params)
+
+    file_operations = FileOperations()
+    file_operations.save_data(data=message["response_json"], path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
+    file_operations.save_data(data=message["response_json"], path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
 
 
 if __name__ == "__main__":

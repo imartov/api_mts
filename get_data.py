@@ -6,11 +6,11 @@ from utils import create_extra_id, FileOperations
 
 def get_data() -> None:
     ''' получение параметров для запроса '''
-    with open("test_data\\mass_broadcast.json", "r", encoding="utf-8") as file:
+    with open("test_data\\broadcast\\request_params.json", "r", encoding="utf-8") as file:
         request_params = json.load(file)
 
     # get text message
-    with open("text_message.txt", "r", encoding="utf-8") as file:
+    with open("test_data\\broadcast\\text_message.txt", "r", encoding="utf-8") as file:
         text_message = file.read()
 
     # get environment variables

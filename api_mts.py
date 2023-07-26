@@ -5,7 +5,7 @@ from loguru import logger
 
 
 # add logger
-logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='10 KB', compression='zip')
+logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 KB', compression='zip')
 
 class ApiMTS:
     ''' Class for sending messages and getting reports '''
@@ -105,13 +105,9 @@ class ApiMTS:
             # TODO: notice to phone
 
 
-if __name__ == "__main__":
-    p = ApiMTS()
-    # print("\nMain:")
-    # print(p["http_code"])
-    # print(p["response_json"])
+    def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
+        pass
 
-    
-    resp = requests.get(url="https://api.communicator.mts.by/1254/json2/job/status/4b7f9d84-2ae4-11ee-8bb1-0050569d4780",
-                        auth=(p.LOGIN, p.PASSWORD))
-    print(resp.json())
+
+if __name__ == "__main__":
+    pass
