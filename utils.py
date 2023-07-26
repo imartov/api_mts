@@ -44,13 +44,13 @@ class FileOperations:
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
 
-    def delete_file(self, path_to_folder:list, count_days=30) -> None:
+    def delete_file(self, paths_to_folders:list, count_days=30) -> None:
         ''' this method removes file that was created defined days ago '''
         delete_data = datetime.datetime.now() - datetime.timedelta(days=count_days)
-        delete_file = delete_data.strftime(self.strftime) + self.file_extension
-        print(delete_file)
-        # TODO: to end
-
+        for path_to_folder in paths_to_folders:
+            delete_file_tuple = self.create_file_name_by_date(path_to_folder=path_to_folder, data=delete_data)
+            if os.path.isfile(delete_file_tuple[1]):
+                os.remove(delete_file_tuple[1])
 
 
 def create_extra_id() -> str:
@@ -77,6 +77,10 @@ def make_valid_phone_number(phone_number:str):
 
 
 if __name__ == "__main__":
-    p = FileOperations().create_file_name_by_date(path_to_folder="a")
-    print(p)
+    paths_to_folders = [
+        "a\\aa",
+        "b\\bb",
+        "c\\cc"
+    ]
+    p = FileOperations().delete_file(paths_to_folders=paths_to_folders)
     
