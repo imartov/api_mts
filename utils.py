@@ -46,6 +46,12 @@ class FileOperations:
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
 
+    def save_data_using_popular_api_methods():
+        ''' this method saves data that return after using
+         popular methods in api_mts.py '''
+        pass
+
+
     def delete_file(self, paths_to_folders:list, count_days=30) -> None:
         ''' this method removes file that was created defined days ago '''
         delete_data = datetime.datetime.now() - datetime.timedelta(days=count_days)
@@ -96,11 +102,12 @@ def notice_exception(text_exception:str) -> None:
         request_params["channel_options"]["viber"]["text"] = text_message
         request_params["channel_options"]["viber"]["alpha_name"] = alpha_name
 
-    message = ApiMTS().send_one_message_and_get_report_by_message_id(by="one_message", request_params=request_params)
+    message = ApiMTS().send_one_message_and_get_report_by_message_id(request_params=request_params)
 
     file_operations = FileOperations()
-    file_operations.save_data(data=message["response_json"], path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
-    file_operations.save_data(data=message["response_json"], path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
+    file_operations.save_data(data=request_params, path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
+    file_operations.save_data(data=message["resp_message"], path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
+    file_operations.save_data(data=message["resp_report"], path_to_folder=os.getenv("SAVE_REPORTS"))
 
 
 if __name__ == "__main__":

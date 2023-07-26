@@ -118,6 +118,7 @@ class ApiMTS:
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
             # TODO: notice to phone, try except
+            # TODO: try message with viber with image and links
 
 
 if __name__ == "__main__":
