@@ -82,7 +82,7 @@ class ApiMTS:
             print("\nSomething is going wrong: ")
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
-            # TODO: notice to phone
+            # TODO: notice to phone, try except
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
@@ -102,11 +102,22 @@ class ApiMTS:
             print("\nSomething is going wrong: ")
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
-            # TODO: notice to phone
+            # TODO: notice to phone, try except
 
 
     def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
-        pass
+        ''' another popular method for sending one message and get report '''
+        message = self.send_message(by="one_message", request_params=request_params)
+        if message["http_code"] == 200:
+            message_response_json = message["response_json"]
+            message_id = message_response_json["message_id"].strip()
+            report = self.get_report(by="message_id", message_id=message_id)
+            return {"resp_message": message_response_json, "resp_report": report["response_json"]}
+        else:
+            print("\nSomething is going wrong: ")
+            print(f"http-code of sending message: {message['http_code']}")
+            # TODO: return
+            # TODO: notice to phone, try except
 
 
 if __name__ == "__main__":

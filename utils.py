@@ -80,7 +80,7 @@ def make_valid_phone_number(phone_number:str):
 
 def notice_exception(text_exception:str) -> None:
     ''' this method sends to defined phone number notice 
-     abut exceptions during run key methods '''
+     abut exceptions during running key methods '''
     load_dotenv()
     with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE"), "r", encoding="utf-8") as file:
         text_message = file.read()
@@ -96,7 +96,7 @@ def notice_exception(text_exception:str) -> None:
         request_params["channel_options"]["viber"]["text"] = text_message
         request_params["channel_options"]["viber"]["alpha_name"] = alpha_name
 
-    message = ApiMTS().send_message(by="one_message", request_params=request_params)
+    message = ApiMTS().send_one_message_and_get_report_by_message_id(by="one_message", request_params=request_params)
 
     file_operations = FileOperations()
     file_operations.save_data(data=message["response_json"], path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
