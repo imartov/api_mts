@@ -5,19 +5,24 @@ import datetime
 class FileOperations:
     ''' class for save request params of sent messages '''
     def __init__(self) -> None:
-        self.today = datetime.date.today().strftime("%d/%m/%Y").replace("/", "_")
-        self.strftime = "%H:%M:%S"
-        self.file_extension = ".json"
-        self.file_name = self.today + self.file_extension
+        self.strftime_time = "%H:%M:%S"
         self.data_list = []
 
-    # TODO: create method for create file name
+    def create_file_name_by_date(self, path_to_folder:str, data=datetime.date.today()) -> dict:
+        ''' this method creates file name using defined data
+        default defined data is today '''
+        strftime_date = "%d/%m/%Y"
+        file_extension = ".json"
+        file_name = data.strftime(strftime_date).replace("/", "_") + file_extension
+        full_file_name = path_to_folder + "\\" + file_name
+        return file_name, full_file_name
+
 
     def save_data(self, data, path_to_folder:str) -> None:
         ''' defining if file exists and add current time '''
-        data["time"] = datetime.datetime.now().strftime(self.strftime)
-        full_file_name = path_to_folder + "\\" + self.file_name
-        if self.file_name not in os.listdir(path_to_folder):
+        data["time"] = datetime.datetime.now().strftime(self.strftime_time)
+        file_name, full_file_name = self.create_file_name_by_date(path_to_folder=path_to_folder)
+        if file_name not in os.listdir(path_to_folder):
             self.data_list.append(data)
             self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
@@ -39,7 +44,7 @@ class FileOperations:
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
 
-    def delete_file(self, path_to_folder:str, count_days=30) -> None:
+    def delete_file(self, path_to_folder:list, count_days=30) -> None:
         ''' this method removes file that was created defined days ago '''
         delete_data = datetime.datetime.now() - datetime.timedelta(days=count_days)
         delete_file = delete_data.strftime(self.strftime) + self.file_extension
@@ -72,5 +77,6 @@ def make_valid_phone_number(phone_number:str):
 
 
 if __name__ == "__main__":
-    p = FileOperations()
-    p.delete_file(path_to_folder="a")
+    p = FileOperations().create_file_name_by_date(path_to_folder="a")
+    print(p)
+    

@@ -83,7 +83,6 @@ class ApiMTS:
             print(f"http-code of sending message: {message['http_code']}")
             # TODO: return
             # TODO: notice to phone
-            # TODO: fix saving request params to response data
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
