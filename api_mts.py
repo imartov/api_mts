@@ -2,8 +2,8 @@ import os, json, time
 import requests
 from dotenv import load_dotenv
 from loguru import logger
-# from utils import notice_exception
-# TODO: fix circular import
+from utils import create_extra_id
+from file_operations import FileOperations
 
 
 # add logger
@@ -22,7 +22,7 @@ class ApiMTS:
 
 
     def get_url(self, by:str, **kwargs) -> str:
-        ''' method for get url
+        ''' this method is for get url
          if you get url for send message just define "by" parametr,
          if you get url for get_report define "by" and
          "job_id" or "exrta_id" or "message_id" parametrs '''
@@ -36,13 +36,14 @@ class ApiMTS:
 
     @logger.catch()
     def send_message(self, by:str, request_params:dict) -> dict:
-        ''' method for send messages as one as mass '''
+        ''' this method is for send messages as one as mass '''
         url = self.get_url(send_message=True, by=by)
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
         try:
+            response.json()["status_code"] = int(response.status_code)
             return {"http_code": int(response.status_code), "response_json": response.json()}
         except Exception as text_exception:
-            notice_exception(text_exception=text_exception)
+            self.notice_exception(text_exception=text_exception)
             # TODO: email
             return {"http_code": int(response.status_code)}
     
@@ -57,7 +58,7 @@ class ApiMTS:
         while not right_resp:
             if seconds >= limit_seconds:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds}"
-                notice_exception(text_exception=text_exception)
+                self.notice_exception(text_exception=text_exception)
                 # TODO: email
                 break
             else:      
@@ -67,10 +68,11 @@ class ApiMTS:
                 else:
                     seconds += 2
                     time.sleep(2)
-        try:            
+        try:
+            response.json()["status_code"] = int(response.status_code)
             return {"http_code": int(response.status_code), "response_json": response.json()}
         except Exception as text_exception:
-            notice_exception(text_exception=text_exception)
+            self.notice_exception(text_exception=text_exception)
     
 
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict) -> dict:
@@ -85,7 +87,7 @@ class ApiMTS:
                     "http_code": message["http_code"],
                     "resp_report": report["response_json"]}
         except Exception as text_exception:
-            notice_exception(text_exception=text_exception)
+            self.notice_exception(text_exception=text_exception)
             # TODO: message to email
             return {"resp_message": message_resp_json,
                     "http_code": message["http_code"]}
@@ -108,7 +110,7 @@ class ApiMTS:
                     "http_code": message["http_code"],
                     "resp_report": report_list}
         except Exception as text_exception:
-            notice_exception(text_exception=text_exception)
+            self.notice_exception(text_exception=text_exception)
             return {"resp_message": message_resp_json,
                     "http_code": message["http_code"]}
 
@@ -124,13 +126,35 @@ class ApiMTS:
                     "http_code": message["http_code"],
                     "resp_report": report["response_json"]}
         except Exception as text_exception:
-            notice_exception(text_exception=text_exception)
+            self.notice_exception(text_exception=text_exception)
             return {"resp_message": message_resp_json,
                     "http_code": message["http_code"]}
-            # TODO: save to data http-code
+        
+
+    def notice_exception(self, text_exception:str) -> None:
+        ''' this method sends to defined phone number notice 
+        abut exceptions during running key methods '''
+        load_dotenv()
+        with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE_SMS"), "r", encoding="utf-8") as file:
+            text_message = file.read()
+            text_message = text_message.format(text_exception=text_exception)
+        
+        with open(os.getenv("NOTICE_EXCEPTION_REQUEST_PARAMS_SMS"), "r", encoding="utf-8") as file:
+            request_params = json.load(file)
+
+            request_params["phone_number"] = int(os.getenv("NOTICE_EXCEPTION_PHONE_NUMBER"))
+            request_params["extra_id"] = create_extra_id()
+            alpha_name = os.getenv("ALPHA_NAME")
+            request_params["channel_options"]["sms"]["text"] = text_message
+            request_params["channel_options"]["sms"]["alpha_name"] = alpha_name
+
+        message = self.send_one_message_and_get_report_by_message_id(request_params=request_params)
+
+        file_operations = FileOperations()
+        file_operations.save_data_using_popular_api_methods(resp_message=message["resp_message"],
+                                                            resp_report=message["resp_report"],
+                                                            request_params=request_params)
 
 
 if __name__ == "__main__":
-    # p = ApiMTS().get_url(by="SM_MASS_BROADCAST_SYNC", extra_id="12345")
-    p = ApiMTS().get_url(by="SM_MASS_BROADCAST_SYNC")
-    print(p)
+    pass
