@@ -44,7 +44,6 @@ class ApiMTS:
             return {"http_code": int(response.status_code), "response_json": response.json()}
         except Exception as text_exception:
             self.notice_exception(text_exception=text_exception)
-            # TODO: email
             return {"http_code": int(response.status_code)}
     
 
@@ -59,7 +58,6 @@ class ApiMTS:
             if seconds >= limit_seconds:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds}"
                 self.notice_exception(text_exception=text_exception)
-                # TODO: email
                 break
             else:      
                 response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
@@ -88,7 +86,6 @@ class ApiMTS:
                     "resp_report": report["response_json"]}
         except Exception as text_exception:
             self.notice_exception(text_exception=text_exception)
-            # TODO: message to email
             return {"resp_message": message_resp_json,
                     "http_code": message["http_code"]}
 
