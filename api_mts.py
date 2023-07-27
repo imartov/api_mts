@@ -2,7 +2,7 @@ import os, json, time
 import requests
 from dotenv import load_dotenv
 from loguru import logger
-from utils import notice_exception
+# from utils import notice_exception
 # TODO: fix circular import
 
 
@@ -21,15 +21,15 @@ class ApiMTS:
         self.PASSWORD = os.getenv("PASSWORD")
 
 
-    def get_url(self, by:str, job_id=None, message_id=None, extra_id=None) -> str:
-        ''' method for get url '''
+    def get_url(self, by:str, **kwargs) -> str:
+        ''' method for get url
+         if you get url for send message just define "by" parametr,
+         if you get url for get_report define "by" and
+         "job_id" or "exrta_id" or "message_id" parametrs '''
         load_dotenv()
-        if job_id:
-            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, job_id=job_id)
-        elif message_id:
-            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, message_id=message_id)
-        elif extra_id:
-            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, extra_id=extra_id)
+        if locals()["kwargs"]:
+            value = list(locals()["kwargs"].values())[0]
+            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, key=value)
         else:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
 
@@ -131,5 +131,6 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    p = ApiMTS().get_url(by="GR_EXTRA_ID_ADVANCED", extra_id="12345")
+    # p = ApiMTS().get_url(by="SM_MASS_BROADCAST_SYNC", extra_id="12345")
+    p = ApiMTS().get_url(by="SM_MASS_BROADCAST_SYNC")
     print(p)
