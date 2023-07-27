@@ -1,5 +1,6 @@
 import uuid, os, json
 from dotenv import load_dotenv
+from api_mts import ApiMTS
 
 
 def create_extra_id() -> str:
@@ -22,10 +23,10 @@ def make_valid_phone_number(phone_number:str):
             return valid_phone_number
         elif len(valid_phone_number) <= 8:
             text_exteption = "Телефонный номер содержит некорректный код оператора"
-            notice_exception(text_exception=text_exteption)
+            notice = ApiMTS().notice_exception(text_exception=text_exteption)
             return None
     except Exception as text_exteption:
-        notice_exception(text_exception=text_exteption)
+        notice = ApiMTS().notice_exception(text_exception=text_exteption)
         # TODO: message to email?
 
 
