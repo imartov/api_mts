@@ -46,17 +46,14 @@ class FileOperations:
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
 
-    def save_data_using_popular_api_methods(self, resp_message=None, resp_report=None, request_params=None) -> None:
+    def save_data_using_popular_api_methods(self, **kwargs) -> None:
         ''' this method saves data that return after using
          popular methods in api_mts.py '''
         load_dotenv()
-        file_operations = FileOperations()
-        if resp_message:
-            file_operations.save_data(data=resp_message, path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
-        if resp_report:
-            file_operations.save_data(data=resp_report, path_to_folder=os.getenv("SAVE_REPORTS"))
-        if request_params:
-            file_operations.save_data(data=request_params, path_to_folder=os.getenv("SAVE_REQUEST_PARAMS"))
+        for key, value in kwargs.items():
+            path_to_folder = "SAVE_" + str(key).upper()
+            print(key, value, path_to_folder)
+            self.save_data(data=value, path_to_folder=os.getenv(path_to_folder))
 
 
     def delete_file(self, paths_to_folders:list, count_days=30) -> None:
@@ -66,6 +63,7 @@ class FileOperations:
             delete_file_tuple = self.create_file_name_by_date(path_to_folder=path_to_folder, data=delete_data)
             if os.path.isfile(delete_file_tuple[1]):
                 os.remove(delete_file_tuple[1])
+        # TODO: any include
 
 
 def create_extra_id() -> str:

@@ -34,11 +34,9 @@ def get_data() -> None:
 
     # create instance of FileOperations
     file_operations = FileOperations()
-    file_operations.save_data_using_popular_api_methods(resp_message=message["resp_message"],
-                                                        resp_report=message["resp_report"],
+    file_operations.save_data_using_popular_api_methods(response_data=send_messages["resp_message"],
+                                                        reports=send_messages["resp_report"],
                                                         request_params=request_params)
-
-# TODO: add delete data after month
 
 
 if __name__ == "__main__":

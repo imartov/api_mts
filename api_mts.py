@@ -2,7 +2,7 @@ import os, json, time
 import requests
 from dotenv import load_dotenv
 from loguru import logger
-# from utils import notice_exception
+from utils import notice_exception
 # TODO: fix circular import
 
 
