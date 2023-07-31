@@ -20,18 +20,16 @@ class ApiMTS:
         self.PASSWORD = os.getenv("PASSWORD")
 
 
-    def get_url(self, by:str, **kwargs) -> str:
+    def get_url(self, by:str, var=None) -> str:
         ''' this method is for get url
          if you get url for send message just define "by" parametr,
          if you get url for get_report define "by" and
          "job_id" or "exrta_id" or "message_id" parametrs '''
         load_dotenv()
-        if locals()["kwargs"]:
-            value = list(locals()["kwargs"].values())[0]
-            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, key=value)
+        if var:
+            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, var=var)
         else:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
-        # TODO: fix this method
 
 
     @logger.catch()
@@ -45,10 +43,10 @@ class ApiMTS:
     
 
     @logger.catch()
-    def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
-        ''' method for get reports '''
-        url = self.get_url(by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
-        print(url)
+    def get_report(self, by:str, var:str) -> dict:
+        ''' method for get reports
+         you should define "by" and "job_id" or "exrta_id" or "message_id" parametrs '''
+        url = self.get_url(by=by, var=var)
         right_resp = False
         seconds = 0
         limit_seconds = 180
@@ -142,6 +140,4 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    p = ApiMTS()
-    message_id = 123
-    _report = ApiMTS().get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
+    pass
