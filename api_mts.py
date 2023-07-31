@@ -80,8 +80,10 @@ class ApiMTS:
         job_id = message_resp_json["job_id"].strip()
         _report = self.get_report(by="GR_JOB_ID", job_id=job_id)
         return {"resp_message": message_resp_json,
-                "http_code": _message["http_code"],
-                "resp_report": _report["response_json"]}
+                "sm_http_code": _message["http_code"],
+                "resp_report": _report["response_json"],
+                "gr_http_code": _report["http_code"]}
+        # TODO: http_code of reports
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
@@ -97,22 +99,24 @@ class ApiMTS:
             _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
             report_list.append(_report["response_json"])
         return {"resp_message": message_resp_json,
-                "http_code": _message["http_code"],
-                "resp_report": report_list}
+                "sm_http_code": _message["http_code"],
+                "resp_report": report_list,
+                "gr_http_code": _report["http_code"]}
 
 
     def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular method for sending one message and get report by message_id'''
-        message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
-        message_resp_json = message["response_json"]
+        _message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
+        message_resp_json = _message["response_json"]
         message_id = message_resp_json["message_id"].strip()
         _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
         return {"resp_message": message_resp_json,
-                "http_code": message["http_code"],
-                "resp_report": _report["response_json"]}
+                "sm_http_code": _message["http_code"],
+                "resp_report": _report["response_json"],
+                "gr_http_code": _report["http_code"]}
         
 
-    def notice_exception(self, text_exception:str) -> None:
+    def notice_info(self, text_exception:str) -> None:
         ''' this method sends to defined phone number notice 
         abut exceptions during running key methods '''
         load_dotenv()
