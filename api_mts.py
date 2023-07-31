@@ -31,12 +31,12 @@ class ApiMTS:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, key=value)
         else:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
+        # TODO: fix this method
 
 
     @logger.catch()
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
-        print(request_params)
         url = self.get_url(by=by)
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
         response_json = response.json()
@@ -48,6 +48,7 @@ class ApiMTS:
     def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
         ''' method for get reports '''
         url = self.get_url(by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
+        print(url)
         right_resp = False
         seconds = 0
         limit_seconds = 180
@@ -66,9 +67,10 @@ class ApiMTS:
                     time.sleep(2)
 
         response_json = response.json()
-        response_json["status_code"] = int(response.status_code)
-        return {"http_code": int(response.status_code), "response_json": response_json}
-    
+        http_code = int(response.status_code)
+        response_json["status_code"] = http_code
+        return {"http_code": http_code, "response_json": response_json}
+        
 
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
@@ -83,7 +85,6 @@ class ApiMTS:
                 "sm_http_code": _message["http_code"],
                 "resp_report": _report["response_json"],
                 "gr_http_code": _report["http_code"]}
-        # TODO: http_code of reports
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
@@ -116,7 +117,7 @@ class ApiMTS:
                 "gr_http_code": _report["http_code"]}
         
 
-    def notice_info(self, text_exception:str) -> None:
+    def notice_exception(self, text_exception:str) -> None:
         ''' this method sends to defined phone number notice 
         abut exceptions during running key methods '''
         load_dotenv()
@@ -127,7 +128,7 @@ class ApiMTS:
         with open(os.getenv("NOTICE_EXCEPTION_REQUEST_PARAMS_SMS"), "r", encoding="utf-8") as file:
             request_params = json.load(file)
 
-            request_params["phone_number"] = int(os.getenv("NOTICE_EXCEPTION_PHONE_NUMBER"))
+            request_params["phone_number"] = int(os.getenv("INFO_PHONE_NUMBER"))
             alpha_name = os.getenv("ALPHA_NAME")
             request_params["channel_options"]["sms"]["text"] = text_message
             request_params["channel_options"]["sms"]["alpha_name"] = alpha_name
@@ -142,4 +143,5 @@ class ApiMTS:
 
 if __name__ == "__main__":
     p = ApiMTS()
-    p.get_report(by="GR_JOB_ID", job_id="740ca600-2f73-11ee-8bb1-0050569d4780")
+    message_id = 123
+    _report = ApiMTS().get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
