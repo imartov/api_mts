@@ -52,7 +52,6 @@ class FileOperations:
         load_dotenv()
         for key, value in kwargs.items():
             path_to_folder = "SAVE_" + str(key).upper()
-            print(key, value, path_to_folder)
             self.save_data(data=value, path_to_folder=os.getenv(path_to_folder))
 
 

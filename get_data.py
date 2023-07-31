@@ -27,8 +27,6 @@ def get_data_mass_broadcast(sync=False) -> dict:
     request_params["channel_options"]["sms"]["alpha_name"] = os.getenv("ALPHA_NAME")
 
     # saving request params
-    file_operations = FileOperations()
-    file_operations.save_data_using_popular_api_methods(request_params=request_params)
     return request_params
 
 

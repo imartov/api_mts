@@ -27,39 +27,34 @@ class ApiMTS:
          "job_id" or "exrta_id" or "message_id" parametrs '''
         load_dotenv()
         if locals()["kwargs"]:
-            print("\n", locals()["kwargs"])
             value = list(locals()["kwargs"].values())[0]
-            print(value)
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, key=value)
         else:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
-        # TODO: fix get url
 
 
     @logger.catch()
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
+        print(request_params)
         url = self.get_url(by=by)
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
-        try:
-            response.json()["status_code"] = int(response.status_code)
-            return {"http_code": int(response.status_code), "response_json": response.json()}
-        except Exception as text_exception:
-            print("\nSomething is going wrong:")
-            print(text_exception)
+        response.json()["status_code"] = int(response.status_code)
+        return {"http_code": int(response.status_code), "response_json": response.json()}
     
 
     @logger.catch()
     def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
         ''' method for get reports '''
         url = self.get_url(by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
+        print(url)
         right_resp = False
         seconds = 0
         limit_seconds = 180
         while not right_resp:
             if seconds >= limit_seconds:
-                text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds}"
-                self.notice_exception(text_exception=text_exception)
+                text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
+                print(text_exception)
                 break
             else:      
                 response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
@@ -68,64 +63,53 @@ class ApiMTS:
                 else:
                     seconds += 2
                     time.sleep(2)
-        try:
-            response.json()["status_code"] = int(response.status_code)
-            return {"http_code": int(response.status_code), "response_json": response.json()}
-        except Exception as text_exception:
-            print("\nSomething is going wrong:")
-            print(text_exception)
+
+        print(response.status_code, response.json())
+        response_json = response.json()
+        response_json["status_code"] = int(response.status_code)
+        return {"http_code": int(response.status_code), "response_json": response_json}
     
 
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
          by broadcast and getting report by job_id for full company '''
-        message = self.send_message(by="mass_broadcast", request_params=request_params)
-        try:
-            message_resp_json = message["response_json"]
-            job_id = message_resp_json["job_id"].strip()
-            report = self.get_report(by="job_id", job_id=job_id)
-            return {"resp_message": message_resp_json,
-                    "http_code": message["http_code"],
-                    "resp_report": report["response_json"]}
-        except Exception as text_exception:
-            print("\nSomething is going wrong:")
-            print(text_exception)
+        _message = self.send_message(by="SM_MASS_BROADCAST", request_params=request_params)
+        print(_message["http_code"], _message["response_json"])
+
+        message_resp_json = _message["response_json"]
+        job_id = message_resp_json["job_id"].strip()
+        _report = self.get_report(by="GR_JOB_ID", job_id=job_id)
+        return {"resp_message": message_resp_json,
+                "http_code": _message["http_code"],
+                "resp_report": _report["response_json"]}
 
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular request method for sending mass messages
          using by braodcast and get report for ever message by message_id '''
-        message = self.send_message(by="mass_broadcast_sync", request_params=request_params)
-        try:
-            message_resp_json = message["response_json"]
-            message_id_list = []
-            for message in message_resp_json["messages"]:
-                message_id_list.append(message["message_id"])
-            report_list = []
-            for message_id in message_id_list:
-                report = self.get_report(by="message_id_advanced", message_id=message_id)
-                report_list.append(report["response_json"])
-            return {"resp_message": message_resp_json,
-                    "http_code": message["http_code"],
-                    "resp_report": report_list}
-        except Exception as text_exception:
-            print("\nSomething is going wrong:")
-            print(text_exception)
+        _message = self.send_message(by="SM_MASS_BROADCAST_SYNC", request_params=request_params)
+        message_resp_json = _message["response_json"]
+        message_id_list = []
+        for messages in message_resp_json["messages"]:
+            message_id_list.append(messages["message_id"])
+        report_list = []
+        for message_id in message_id_list:
+            _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
+            report_list.append(_report["response_json"])
+        return {"resp_message": message_resp_json,
+                "http_code": _message["http_code"],
+                "resp_report": report_list}
 
 
     def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular method for sending one message and get report by message_id'''
-        try:
-            message = self.send_message(by="one_message", request_params=request_params)
-            message_resp_json = message["response_json"]
-            message_id = message_resp_json["message_id"].strip()
-            report = self.get_report(by="message_id_advanced", message_id=message_id)
-            return {"resp_message": message_resp_json,
-                    "http_code": message["http_code"],
-                    "resp_report": report["response_json"]}
-        except Exception as text_exception:
-            print("\nSomething is going wrong:")
-            print(text_exception)
+        message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
+        message_resp_json = message["response_json"]
+        message_id = message_resp_json["message_id"].strip()
+        _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
+        return {"resp_message": message_resp_json,
+                "http_code": message["http_code"],
+                "resp_report": _report["response_json"]}
         
 
     def notice_exception(self, text_exception:str) -> None:
@@ -153,4 +137,5 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    pass
+    p = ApiMTS()
+    p.get_report(by="GR_JOB_ID", job_id="740ca600-2f73-11ee-8bb1-0050569d4780")
