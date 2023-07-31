@@ -33,9 +33,9 @@ class GetData:
         return request_params
 
 
-    def get_request_params_one_message(self, text:str, phone_number:int) -> dict:
+    def get_request_params_one_message(self, path_to_request_params:str, text:str, phone_number:int) -> dict:
         ''' this method if for getting data for send message about success messages-delivering '''
-        with open("test_data\\success\\request_params.json", "r", encoding="utf-8") as file:
+        with open(path_to_request_params, "r", encoding="utf-8") as file:
             request_params = json.load(file)
 
         # get environment variables and generate extra_id and set data for request params

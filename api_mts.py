@@ -1,12 +1,8 @@
 import os, json, time
 import requests
 from dotenv import load_dotenv
-from loguru import logger
 from file_operations import FileOperations
 
-
-# add logger
-logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 KB', compression='zip')
 
 class ApiMTS:
     ''' Class for sending messages and getting reports '''
@@ -32,7 +28,6 @@ class ApiMTS:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
 
 
-    @logger.catch()
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
         url = self.get_url(by=by)
@@ -42,7 +37,6 @@ class ApiMTS:
         return {"http_code": int(response.status_code), "response_json": response_json}
     
 
-    @logger.catch()
     def get_report(self, by:str, var:str) -> dict:
         ''' method for get reports
          you should define "by" and "job_id" or "exrta_id" or "message_id" parametrs '''
@@ -50,7 +44,7 @@ class ApiMTS:
         right_resp = False
         seconds = 0
         limit_seconds = 180
-        print("Ожидание ответа от сервера для получения отчета...")
+        print("\nОжидание ответа от сервера для получения отчета...")
         while not right_resp:
             if seconds >= limit_seconds:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
@@ -60,6 +54,7 @@ class ApiMTS:
                 response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
                 if int(response.status_code) == 200:
                     right_resp = True
+                    print("Ответ успешно получен.")
                 else:
                     seconds += 2
                     time.sleep(2)
@@ -108,7 +103,7 @@ class ApiMTS:
         _message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
         message_resp_json = _message["response_json"]
         message_id = message_resp_json["message_id"].strip()
-        _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
+        _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", var=message_id)
         return {"resp_message": message_resp_json,
                 "sm_http_code": _message["http_code"],
                 "resp_report": _report["response_json"],
