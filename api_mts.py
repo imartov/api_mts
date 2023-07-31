@@ -39,18 +39,19 @@ class ApiMTS:
         print(request_params)
         url = self.get_url(by=by)
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
-        response.json()["status_code"] = int(response.status_code)
-        return {"http_code": int(response.status_code), "response_json": response.json()}
+        response_json = response.json()
+        response_json["status_code"] = int(response.status_code)
+        return {"http_code": int(response.status_code), "response_json": response_json}
     
 
     @logger.catch()
     def get_report(self, by:str, job_id=None, message_id=None, extra_id=None) -> dict:
         ''' method for get reports '''
         url = self.get_url(by=by, job_id=job_id, message_id=message_id, extra_id=extra_id)
-        print(url)
         right_resp = False
         seconds = 0
         limit_seconds = 180
+        print("Ожидание ответа от сервера для получения отчета...")
         while not right_resp:
             if seconds >= limit_seconds:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
@@ -64,7 +65,6 @@ class ApiMTS:
                     seconds += 2
                     time.sleep(2)
 
-        print(response.status_code, response.json())
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
         return {"http_code": int(response.status_code), "response_json": response_json}
