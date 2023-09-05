@@ -5,7 +5,7 @@ from file_operations import FileOperations
 
 
 class ApiMTS:
-    ''' Class for sending messages and getting reports '''
+    ''' Class for sending messages and get reports '''
     
     def __init__(self) -> None:
         
@@ -67,13 +67,11 @@ class ApiMTS:
 
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
-         by broadcast and getting report by job_id for full company '''
+         by broadcast and get report by job_id for full company '''
         _message = self.send_message(by="SM_MASS_BROADCAST", request_params=request_params)
-        print(_message["http_code"], _message["response_json"])
-
         message_resp_json = _message["response_json"]
         job_id = message_resp_json["job_id"].strip()
-        _report = self.get_report(by="GR_JOB_ID", job_id=job_id)
+        _report = self.get_report(by="GR_JOB_ID", var=job_id)
         return {"resp_message": message_resp_json,
                 "sm_http_code": _message["http_code"],
                 "resp_report": _report["response_json"],
@@ -90,7 +88,7 @@ class ApiMTS:
             message_id_list.append(messages["message_id"])
         report_list = []
         for message_id in message_id_list:
-            _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", message_id=message_id)
+            _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", var=message_id)
             report_list.append(_report["response_json"])
         return {"resp_message": message_resp_json,
                 "sm_http_code": _message["http_code"],
