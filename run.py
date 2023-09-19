@@ -35,33 +35,37 @@ class Run:
     def run_mass_broadcast(self, sync=False) -> None:
         ''' this method defines queues of methods
         for running mass broadcast delivering '''
-        try:
-            request_params = GetData().get_request_params_mass_broadcast(sync=sync)
-            message = ApiMTS()
-            if sync:
-                send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)
-            else:
-                send_messages = message.send_broadcast_mass_messages_and_get_report_by_job_id(request_params=request_params)
-                print(send_messages)
-            
-            response_data = send_messages["resp_message"]
-            reports = send_messages["resp_report"]
-            file_operations = FileOperations()
-            file_operations.save_data_using_popular_api_methods(request_params = request_params,
-                                                                response_data=response_data,
-                                                                reports=reports)
-            
-            load_dotenv()
-            with open(os.getenv("SUCCES_ONE_MESSAGE_TEXT"), "r", encoding="utf-8") as file:
-                text = file.read()
-            self.get_data_send_message_and_save_data(path_to_request_params=os.getenv("PATH_REQUEST_PARAMS_SUCCESS"),
+        # try:
+        # request_params = GetData().get_request_params_mass_broadcast(sync=sync) # basic request_params
+        request_params = GetData().get_test_request_params_for_exe() # temp request params for test
+        message = ApiMTS()
+        if sync:
+            send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)
+        else:
+            send_messages = message.send_broadcast_mass_messages_and_get_report_by_job_id(request_params=request_params)
+        
+        response_data = send_messages["resp_message"]
+        reports = send_messages["resp_report"]
+        blockr = input("\nClick any button to close the console window")
+        return # temp return func for exe
+    
+        file_operations = FileOperations()
+        file_operations.save_data_using_popular_api_methods(request_params = request_params,
+                                                            response_data=response_data,
+                                                            reports=reports)
+        
+        load_dotenv()
+        with open(os.getenv("SUCCES_ONE_MESSAGE_TEXT"), "r", encoding="utf-8") as file:
+            text = file.read()
+        self.get_data_send_message_and_save_data(path_to_request_params=os.getenv("PATH_REQUEST_PARAMS_SUCCESS"),
                                                      text=text)
-        except Exception as text_exception:
-            with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE_SMS"), "r", encoding="utf-8") as file:
-                text = file.read()
-            text = text.format(text_exception=text_exception)
-            self.get_data_send_message_and_save_data(path_to_request_params=os.getenv("PATH_REQUEST_PARAMS_EXCEPTION"),
-                                                     text=text)
+        # temp comments for exe
+        # except Exception as text_exception:
+        #     with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE_SMS"), "r", encoding="utf-8") as file:
+        #         text = file.read()
+        #     text = text.format(text_exception=text_exception)
+        #     self.get_data_send_message_and_save_data(path_to_request_params=os.getenv("PATH_REQUEST_PARAMS_EXCEPTION"),
+        #                                              text=text)
 
 
 if __name__ == "__main__":

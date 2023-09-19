@@ -1,0 +1,21 @@
+{
+    "recipients": [
+        {
+            "phone_number": 375295001701,
+            "extra_id": "None",
+            "debtor_name": "Козырев Александр",
+            "debt_amount": 1000
+        }
+    ],
+    "tag": "Debt collection",
+    "channels": [
+        "sms"
+    ],
+    "channel_options": {
+        "sms": {
+            "text": "None",
+            "alpha_name": "None",
+            "ttl": 300
+        }
+    }
+}

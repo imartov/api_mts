@@ -45,8 +45,31 @@ class GetData:
         request_params["extra_id"] = create_extra_id()
         request_params["channel_options"]["sms"]["alpha_name"] = os.getenv("ALPHA_NAME")
         return request_params
+    
+
+    def get_test_request_params_for_exe(self):
+        ''' this method is test method for exe '''
+        with open("test_exe_request_params.json", "r", encoding="utf-8") as file:
+            request_params = json.load(file)
+
+        # get text message
+        with open("text_message.txt", "r", encoding="utf-8") as file:
+            text_message = file.read()
+
+        # get environment variables and generate extra_id and set to recipients list
+        load_dotenv()
+        extra_id_list = []
+        for recipient in request_params["recipients"]:
+            extra_id = create_extra_id()
+            extra_id_list.append(extra_id)
+            recipient["extra_id"] = extra_id
+
+        # set text message and alfa name
+        request_params["channel_options"]["sms"]["text"] = text_message
+        request_params["channel_options"]["sms"]["alpha_name"] = os.getenv("ALPHA_NAME")
+        return request_params
 
 
 if __name__ == "__main__":
-    p = GetData().get_request_params_one_message(text="random", phone_number=123)
+    p = GetData().get_test_request_params_for_exe()
     print(p)

@@ -1,4 +1,6 @@
 import os, json, time
+import ssl
+import certifi
 import requests
 from dotenv import load_dotenv
 from file_operations import FileOperations
@@ -31,9 +33,11 @@ class ApiMTS:
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
         url = self.get_url(by=by)
-        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
+        # response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
+        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="C:\\Users\\kozyrev_as\\AppData\\Local\\.certifi\\cacert.pem") # temp for test
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
+        print('\nThe message delivering was successful.')
         return {"http_code": int(response.status_code), "response_json": response_json}
     
 
@@ -44,17 +48,18 @@ class ApiMTS:
         right_resp = False
         seconds = 0
         limit_seconds = 180
-        print("\nОжидание ответа от сервера для получения отчета...")
+        print("Waiting response from server for get delivering report...")
         while not right_resp:
             if seconds >= limit_seconds:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
                 print(text_exception)
                 break
             else:      
-                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+                # response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="C:\\Users\\kozyrev_as\\AppData\\Local\\.certifi\\cacert.pem") # temp for test
                 if int(response.status_code) == 200:
                     right_resp = True
-                    print("Ответ успешно получен.")
+                    print("Delivering report received successfully.")
                 else:
                     seconds += 2
                     time.sleep(2)
