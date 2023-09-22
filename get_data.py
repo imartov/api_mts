@@ -2,7 +2,8 @@ import json, os
 from dotenv import load_dotenv
 from api_mts import ApiMTS
 from file_operations import FileOperations
-from utils import create_extra_id
+from utils import create_extra_id, PhoneOperations
+from openpyxl import load_workbook
 
 
 class GetData:
@@ -68,8 +69,35 @@ class GetData:
         request_params["channel_options"]["sms"]["text"] = text_message
         request_params["channel_options"]["sms"]["alpha_name"] = os.getenv("ALPHA_NAME")
         return request_params
+    
+
+    def parse_xl(self) -> None:
+        ''' open excel file and parse it '''
+        wb = load_workbook(filename=os.getenv("PATH_FILE_NAME_XL"))
+        ws = wb.active
+        
+        phone_operations = PhoneOperations()
+        for row in ws.iter_rows(min_row=3):
+            unp = row[0]
+            company_name = row[1]
+            due_sum = row[4]
+            phone_number = row[10]
+            payment_date = row[12]
+
+            if due_sum.value and int(due_sum.value) >= 1 and not phone_number.value:
+                phone_operations.save_uncorrect_phone_number(unp=unp, company_name=company_name, phone_number=phone_number)
+
+            elif due_sum.value and int(due_sum.value) >= 1 and phone_number.value:
+                valid_phone_number = phone_operations.make_valid_phone_number(unp=unp, company_name=company_name, phone_number=phone_number)
+                if not valid_phone_number:
+                    phone_operations.save_uncorrect_phone_number(unp=unp, company_name=company_name, phone_number=phone_number)
+                else:
+                    pass
+
+                print(f"Debtor: {company_name.value}, Due summ: {due_sum.value}, 'Phone number: {phone_number.value}, 'Payment date: {payment_date.value}")
+        
 
 
 if __name__ == "__main__":
-    p = GetData().get_test_request_params_for_exe()
-    print(p)
+    load_dotenv()
+    p = GetData().parse_xl()

@@ -1,9 +1,9 @@
 # virtualenv
-/api_mts_venv
-api_mts_venv
-*api_mts_venv
-.api_mts_venv
-api_mts_venv/
+/apimts-venv
+apimts-venv
+*apimts-venv
+.apimts-venv
+apimts-venv/
 
 # documentation api mts
 /documentation
@@ -51,3 +51,13 @@ debug.log
 text_message.txt
 /text_message.txt
 *text_message.txt
+
+# certifi
+cacert.pem
+/cacert.pem
+*cacert.pem
+
+# py files
+runtest.py
+/runtest.py
+*runtest.py

@@ -34,7 +34,7 @@ class ApiMTS:
         ''' this method is for send messages as one as mass '''
         url = self.get_url(by=by)
         # response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
-        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="C:\\Users\\kozyrev_as\\AppData\\Local\\.certifi\\cacert.pem") # temp for test
+        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem") # temp for test
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
         print('\nThe message delivering was successful.')
@@ -56,7 +56,7 @@ class ApiMTS:
                 break
             else:      
                 # response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
-                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="C:\\Users\\kozyrev_as\\AppData\\Local\\.certifi\\cacert.pem") # temp for test
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem") # temp for test
                 if int(response.status_code) == 200:
                     right_resp = True
                     print("Delivering report received successfully.")
