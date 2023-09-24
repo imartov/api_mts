@@ -36,7 +36,8 @@ class Run:
         ''' this method defines queues of methods
         for running mass broadcast delivering '''
         # try:
-        request_params = GetData(mass_broadcast=True).parse_xl() # basic request_params
+        # request_params = GetData(mass_broadcast=True).parse_xl() # basic request_params
+        request_params = GetData(mass_broadcast=True).get_test_request_params_for_exe()
         message = ApiMTS()
         if sync:
             send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)

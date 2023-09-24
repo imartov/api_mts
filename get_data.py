@@ -56,15 +56,15 @@ class GetData:
 
     def get_test_request_params_for_exe(self):
         ''' this method is test method for exe '''
-        with open("test_exe_request_params.json", "r", encoding="utf-8") as file:
+        load_dotenv()
+        with open(os.getenv("PATH_EXAM_MASS_BRO_REQ_PAR"), "r", encoding="utf-8") as file:
             request_params = json.load(file)
 
         # get text message
-        with open("text_message.txt", "r", encoding="utf-8") as file:
+        with open(os.getenv("PATH_EXAM_MASS_BRO_TEXT_MESS"), "r", encoding="utf-8") as file:
             text_message = file.read()
 
         # get environment variables and generate extra_id and set to recipients list
-        load_dotenv()
         extra_id_list = []
         for recipient in request_params["recipients"]:
             extra_id = create_extra_id()
