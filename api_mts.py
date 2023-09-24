@@ -25,16 +25,15 @@ class ApiMTS:
          "job_id" or "exrta_id" or "message_id" parametrs '''
         load_dotenv()
         if var:
-            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, var=var)
+            return os.getenv(by.upper()).format(client_id=self.CLIENT_ID, var=var)   
         else:
             return os.getenv(by.upper()).format(client_id=self.CLIENT_ID)
-
+            
 
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
         url = self.get_url(by=by)
-        # response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD))
-        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem") # temp for test
+        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
         print('\nThe message delivering was successful.')
@@ -54,9 +53,8 @@ class ApiMTS:
                 text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
                 print(text_exception)
                 break
-            else:      
-                # response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD))
-                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem") # temp for test
+            else:
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
                 if int(response.status_code) == 200:
                     right_resp = True
                     print("Delivering report received successfully.")
@@ -138,4 +136,5 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    pass
+    p = ApiMTS()
+    p.get_url(by="GR_JOB_ID", var="12345")
