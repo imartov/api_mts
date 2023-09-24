@@ -1,9 +1,12 @@
 import os
+
 from dotenv import load_dotenv
 from loguru import logger
+
 from api_mts import ApiMTS
 from get_data import GetData
 from file_operations import FileOperations
+from checkreport import CheckReport
 
 
 # add logger
@@ -36,8 +39,8 @@ class Run:
         ''' this method defines queues of methods
         for running mass broadcast delivering '''
         # try:
-        # request_params = GetData(mass_broadcast=True).parse_xl() # basic request_params
-        request_params = GetData(mass_broadcast=True).get_test_request_params_for_exe()
+        request_params = GetData(mass_broadcast=True).parse_xl() # basic request_params
+        # request_params = GetData(mass_broadcast=True).get_test_request_params_for_exe()
         message = ApiMTS()
         if sync:
             send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)
@@ -51,6 +54,12 @@ class Run:
         file_operations.save_data_using_popular_api_methods(request_params=request_params,
                                                             response_data=response_data,
                                                             reports=reports)
+        
+        cr = CheckReport()
+        fail_messages = cr.job_id()
+        if fail_messages:
+            # TODO: sent message to admin
+            pass
             
         #     load_dotenv()
         #     with open(os.getenv("SUCCES_ONE_MESSAGE_TEXT"), "r", encoding="utf-8") as file:

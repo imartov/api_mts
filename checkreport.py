@@ -16,8 +16,8 @@ class CheckReport:
 
     def job_id(self, full_file_name=None):
         ''' checking reports that got using job_id '''
+        fo = FileOperations()
         if not full_file_name:
-            fo = FileOperations()
             file_name, full_file_name = fo.create_file_name_by_date(path_to_folder=os.getenv("SAVE_REPORTS"))
         with open(full_file_name, "r", encoding="utf-8") as file:
             data = json.load(file)

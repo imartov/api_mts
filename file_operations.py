@@ -24,13 +24,12 @@ class FileOperations:
         ''' defining if file exists and add current time '''
         if data.__class__ == {}.__class__:
             data["time"] = datetime.datetime.now().strftime(self.strftime_time)
+        file_name, full_file_name = self.create_file_name_by_date(path_to_folder=path_to_folder)
+        if file_name not in os.listdir(path_to_folder):
+            self.data_list.append(data)
+            self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
-            file_name, full_file_name = self.create_file_name_by_date(path_to_folder=path_to_folder)
-            if file_name not in os.listdir(path_to_folder):
-                self.data_list.append(data)
-                self.save_file(data_list=self.data_list, full_file_name=full_file_name)
-            else:
-                self.next_save_data(data, full_file_name=full_file_name)
+            self.next_save_data(data, full_file_name=full_file_name)
 
 
     def save_file(self, data_list:list, full_file_name:str) -> None:
