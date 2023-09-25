@@ -53,6 +53,14 @@ class CheckReport:
 
     def extra_id_simple(self, full_file_name=None):
         return self.fail_messages
+    
+
+class CheckRequestParams:
+    def __init__(self) -> None:
+        pass
+    # TODO: check request params
+
+
 
 
 if __name__ == "__main__":

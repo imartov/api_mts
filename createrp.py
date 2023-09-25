@@ -40,9 +40,9 @@ class RequestParams:
             self.request_params["recipients"].append(recipient)
             return self.request_params
     
-    class RequestParamsOneMessage:
+    class OneMessage:
         def __init__(self, text_message=None, alpha_name=None, ttl=300) -> None:
-            with open(os.getenv("PATH_EXAM_ONE_MESS"), "r", encoding="utf-8") as file:
+            with open(os.getenv("PATH_EXAM_ONE_MESS_REQ_PAR"), "r", encoding="utf-8") as file:
                 self.request_params = json.load(file)
             if not text_message:
                 with open(os.getenv("PATH_EXAM_ONE_MESS_TEXT_MESS"), "r", encoding="utf-8") as file:
@@ -53,13 +53,18 @@ class RequestParams:
             self.request_params = RequestParams.set_authorization_data(request_params=self.request_params,
                                                                        alpha_name=alpha_name,
                                                                        ttl=ttl)
-                
-        def create(self) -> dict:
-            pass
+        def create(self, phone_number=None) -> dict:
+            if not phone_number:
+                phone_number = os.getenv("INFO_PHONE_NUMBER")
+                self.request_params["phone_number"] = phone_number
+            else:
+                self.request_params["phone_number"] = phone_number
+            self.request_params["extra_id"] = create_extra_id()
+            return self.request_params
 
 
 if __name__ == "__main__":
-    p = RequestParams.MassBroadcast()
-    p.create(phone_number=123, company_name="ssdc", debt_sum="876")
-    p.create(phone_number=456, company_name="LKN", debt_sum="567")
+    p = RequestParams.OneMessage()
+    p.create(phone_number=123)
+    p.create(phone_number=456)
     print(p.request_params)

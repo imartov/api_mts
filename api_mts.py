@@ -102,6 +102,7 @@ class ApiMTS:
     def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular method for sending one message and get report by message_id'''
         _message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
+        print(_message)
         message_resp_json = _message["response_json"]
         message_id = message_resp_json["message_id"].strip()
         _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", var=message_id)
