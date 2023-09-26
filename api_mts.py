@@ -36,7 +36,7 @@ class ApiMTS:
         response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
-        print('\nThe message delivering was successful.')
+        print('\nThe message delivering script was succesfully.')
         return {"http_code": int(response.status_code), "response_json": response_json}
     
 
@@ -50,14 +50,14 @@ class ApiMTS:
         print("Waiting response from server for get delivering report...")
         while not right_resp:
             if seconds >= limit_seconds:
-                text_exception = f"Количество секунд ожидания ответа для получения отчета превысило {limit_seconds} секунд."
+                text_exception = f"The seconds count waiting for a response to receive a report has exceeded {limit_seconds} seconds."
                 print(text_exception)
                 break
             else:
                 response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
                 if int(response.status_code) == 200:
                     right_resp = True
-                    print("Delivering report received successfully.")
+                    print("The report recieving script was succesfully.")
                 else:
                     seconds += 2
                     time.sleep(2)
@@ -102,7 +102,6 @@ class ApiMTS:
     def send_one_message_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular method for sending one message and get report by message_id'''
         _message = self.send_message(by="SM_ONE_MESSAGE", request_params=request_params)
-        print(_message)
         message_resp_json = _message["response_json"]
         message_id = message_resp_json["message_id"].strip()
         _report = self.get_report(by="GR_MESSAGE_ID_ADVANCED", var=message_id)

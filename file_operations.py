@@ -30,6 +30,7 @@ class FileOperations:
             self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
             self.next_save_data(data, full_file_name=full_file_name)
+        # return data
 
 
     def save_file(self, data_list:list, full_file_name:str) -> None:

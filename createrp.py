@@ -64,7 +64,4 @@ class RequestParams:
 
 
 if __name__ == "__main__":
-    p = RequestParams.OneMessage()
-    p.create(phone_number=123)
-    p.create(phone_number=456)
-    print(p.request_params)
+    pass

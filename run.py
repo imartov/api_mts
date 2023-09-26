@@ -22,11 +22,20 @@ class Run:
     def run_mass_broadcast(self, sync=False) -> None:
         ''' this method defines queues of methods
         for running mass broadcast delivering '''
+
+        def get_save_req_par_and_send_mes(cl_rq, send_mes=False):
+            request_params = cl_rq
+            request_params_copy = dict(request_params)
+            file_operations.save_data_using_popular_api_methods(request_params=request_params_copy)
+            if send_mes:
+                message.send_one_message_and_get_report_by_message_id(request_params=request_params)
+            else:
+                return request_params
+
         message = ApiMTS()
         file_operations = FileOperations()
         try:
-            request_params = GetData(mass_broadcast=True).parse_xl()
-            file_operations.save_data_using_popular_api_methods(request_params=request_params)
+            request_params = get_save_req_par_and_send_mes(cl_rq=GetData(mass_broadcast=True).parse_xl())
             if sync:
                 send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)
             else:
@@ -38,18 +47,14 @@ class Run:
             cr = CheckReport()
             fail_messages = cr.job_id()
             if fail_messages:
-                request_params_fail = RequestParams.OneMessage().create()
-                message.send_one_message_and_get_report_by_message_id(request_params=request_params_fail)
+                get_save_req_par_and_send_mes(RequestParams.OneMessage().create(), send_mes=True)
             else:
-                request_params_fail = RequestParams.OneMessage(text_message="Message delivering was succesfully").create()
-                message.send_one_message_and_get_report_by_message_id(request_params=request_params_fail)
+                text = "Message delivering was succesfully"
+                get_save_req_par_and_send_mes(RequestParams.OneMessage(text_message=text).create(), send_mes=True)
         except:
-            request_params_fail = RequestParams.OneMessage().create()
-            message.send_one_message_and_get_report_by_message_id(request_params=request_params_fail)
+            get_save_req_par_and_send_mes(RequestParams.OneMessage().create(), send_mes=True)
 
 
 if __name__ == "__main__":
-    message = ApiMTS()
-    request_params_fail = RequestParams.OneMessage().create()
-    print(request_params_fail)
-    message.send_one_message_and_get_report_by_message_id(request_params=request_params_fail)
+    p = Run()
+    p.run_mass_broadcast()
