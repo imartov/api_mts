@@ -33,7 +33,7 @@ class ApiMTS:
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
         url = self.get_url(by=by)
-        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
+        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
         response_json = response.json()
         response_json["status_code"] = int(response.status_code)
         print('\nThe message delivering script was succesfully.')
@@ -54,7 +54,7 @@ class ApiMTS:
                 print(text_exception)
                 break
             else:
-                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify="cacert.pem")
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
                 if int(response.status_code) == 200:
                     right_resp = True
                     print("The report recieving script was succesfully.")

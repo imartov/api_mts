@@ -61,3 +61,8 @@ cacert.pem
 runtest.py
 /runtest.py
 *runtest.py
+
+# cmd
+start.bat
+/start.bat
+*start.bat
