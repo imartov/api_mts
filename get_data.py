@@ -1,4 +1,5 @@
 import json, os
+from datetime import datetime
 
 from dotenv import load_dotenv
 from openpyxl import load_workbook
@@ -26,14 +27,17 @@ class GetData:
             company_name = row[1]
             debt_sum = row[4]
             phone_number = row[10]
+            payment_date = row[12]
+            if not unp.value and not company_name.value and not payment_date.value:
+                break
 
-            # payment_date = row[12]
-            # valid_payment_date = datetime.strptime(payment_date.value, "%d.%m.%Y")
+            valid_payment_date = datetime.strptime(payment_date.value, "%d.%m.%Y")
+            compare_date = bool(valid_payment_date < datetime.now())
 
-            if debt_sum.value and int(debt_sum.value) >= 1 and not phone_number.value:
+            if debt_sum.value and int(debt_sum.value) >= 1 and not phone_number.value and compare_date:
                 phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
 
-            elif debt_sum.value and int(debt_sum.value) >= 1 and phone_number.value:
+            elif debt_sum.value and int(debt_sum.value) >= 1 and phone_number.value and compare_date:
                 valid_phone_number = phone_operations.make_valid_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
                 if not valid_phone_number:
                     phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
