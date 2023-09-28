@@ -45,7 +45,7 @@ class Run:
             file_operations.save_data_using_popular_api_methods(response_data=response_data,
                                                                 reports=reports)
             cr = CheckReport()
-            fail_messages = cr.job_id()
+            fail_messages = cr.job_id_fail()
             if fail_messages:
                 get_save_req_par_and_send_mes(RequestParams.OneMessage().create(), send_mes=True)
             else:

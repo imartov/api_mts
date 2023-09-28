@@ -1,6 +1,4 @@
-def test(var):
-    var += 1
-    print(bool(var.__class__ == type(1)))
+from datetime import datetime
 
 
-h = test(2)
+print(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))

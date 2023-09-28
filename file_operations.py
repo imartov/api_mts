@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 class FileOperations:
     ''' class for save request params of sent messages '''
     def __init__(self) -> None:
-        self.strftime_time = "%H:%M:%S"
+        self.strftime_datatime_format = "%d.%m.%Y %H:%M:%S"
         self.data_list = []
 
 
@@ -23,7 +23,7 @@ class FileOperations:
     def save_data(self, data, path_to_folder:str) -> None:
         ''' defining if file exists and add current time '''
         if data.__class__ == {}.__class__:
-            data["time"] = datetime.datetime.now().strftime(self.strftime_time)
+            data["datetime"] = datetime.datetime.now().strftime(self.strftime_datatime_format)
         file_name, full_file_name = self.create_file_name_by_date(path_to_folder=path_to_folder)
         if file_name not in os.listdir(path_to_folder):
             self.data_list.append(data)
