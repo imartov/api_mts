@@ -31,22 +31,25 @@ class GetData:
             if not unp.value and not company_name.value and not payment_date.value:
                 break
 
-            valid_payment_date = datetime.strptime(payment_date.value, "%d.%m.%Y")
-            compare_date = bool(valid_payment_date < datetime.now())
+            valid_payment_date = datetime.strptime(str(payment_date.value), "%d.%m.%Y")
+            compare_date = bool(valid_payment_date <= datetime.now())
 
             if debt_sum.value and int(debt_sum.value) >= 1 and not phone_number.value and compare_date:
-                phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
+                phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=str(phone_number.value))
 
             elif debt_sum.value and int(debt_sum.value) >= 1 and phone_number.value and compare_date:
-                valid_phone_number = phone_operations.make_valid_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
+                valid_phone_number = phone_operations.make_valid_phone_number(unp=unp.value, company_name=company_name.value, phone_number=str(phone_number.value))
                 if not valid_phone_number:
-                    phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=phone_number.value)
+                    phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=str(phone_number.value))
                 else:
                     self.rp.create(phone_number=valid_phone_number, company_name=company_name.value, debt_sum=debt_sum.value)
         return self.rp.request_params
+    
+    def parse_xl_double(self, success_messages:dict) -> list:
+        request_params = self.parse_xl()
+        return request_params
 
 
 if __name__ == "__main__":
     load_dotenv()
-    p = GetData(mass_broadcast=True).parse_xl()
-    print(p)
+    p = GetData(mass_broadcast=True).parse_xl_double(success_messages={})

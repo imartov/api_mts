@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 from file_operations import FileOperations
+from get_data import GetData
 
 
 class CheckReport:
@@ -14,6 +15,7 @@ class CheckReport:
         self.error_code_msg_status = (36011, 35015, 36021, 36031, 12011, 36041, 36051)
         self.fo = FileOperations()
         self.fail_messages = []
+        self.success_messages = []
         load_dotenv()
 
     def job_id_fail(self, full_file_name=None):
@@ -24,50 +26,47 @@ class CheckReport:
             data = json.load(file)
         
         for delivering in data:
-            for message in delivering["messages"]:
-                if ("error_text" in message or "error_code" in message or
-                   (("status" in message and message["status"] in self.error_code_status)) or
-                   (("substatus" in message and message["substatus"] in self.error_code_substatus)) or
-                   (("msg_status" in message and message["msg_status"] in self.error_code_msg_status))):
-                    
-                    self.fail_messages.append(
-                        {
-                            "full_file_name": full_file_name,
-                            "message_id": message["message_id"],
-                            "extra_id": message["extra_id"],
-                            "phone_number": message["phone_number"],
-                            "time": delivering["time"]
-                        }
-                    )
+            if "messages" in delivering:
+                for message in delivering["messages"]:
+                    if (("status_text" in message and message["status_text"] == "SMS delivered") and
+                        ("msg_status" in message and message["msg_status"] == 23011)):
+                        self.success_messages.append(
+                            {
+                                "delivering_date": delivering["datetime"],
+                                "phone_number": message["phone_number"],
+                            }
+                        )
+                    else:
+                        self.fail_messages.append(
+                            {
+                                "full_file_name": full_file_name,
+                                "message_id": message["message_id"],
+                                "extra_id": message["extra_id"],
+                                "phone_number": message["phone_number"],
+                                "datetime": delivering["datetime"]
+                            }
+                        )
+                        
         if self.fail_messages:
             self.fo.save_data(data=self.fail_messages, path_to_folder=os.getenv("SAVE_FAIL_MESSAGES"))
-        return self.fail_messages
+        return self.fail_messages, self.success_messages
     
-    def job_id_double_mesasge(self, count_days=3):
-        datetime_format = self.fo.strftime_datatime_format
-        date_format = "%d.%m.%Y"
-        phone_numbers_double_message = []
+    def job_id_double_mesasge(self, days=3):
+        ''' this method checks all job_id reports and rewrite file of success mass delivering '''
         for report_file_name in os.listdir(os.getenv("SAVE_REPORTS_JOB_ID")):
             full_file_name = os.getenv("SAVE_REPORTS_JOB_ID") + "\\\\" + report_file_name
-            with open(full_file_name, "r", encoding="utf-8") as file:
-                report_data = json.load(file)
-            for delivering in report_data:
-                if "messages" in delivering:
-                    for message in delivering["messages"]:
-                        if ("error_text" in message or "error_code" in message or
-                        (("status" in message and message["status"] in self.error_code_status)) or
-                        (("substatus" in message and message["substatus"] in self.error_code_substatus)) or
-                        (("msg_status" in message and message["msg_status"] in self.error_code_msg_status))):
-                            continue
-                        else:
-                            delivering_date = datetime.strptime(delivering["datetime"], datetime_format)
-                            three_days_ago = datetime.now() - timedelta(days=count_days)
-                            if delivering_date.strftime(date_format) != three_days_ago.strftime(date_format):
-                                phone_numbers_double_message.append(message["phone_number"])
-                                
-                            
-                            
-                            
+            self.job_id_fail(full_file_name=full_file_name)[1]
+        self.fo.save_file(data_list=self.success_messages, full_file_name=os.getenv("SAVE_SUCCESS_MESSAGES"))
+
+        request_params = GetData(mass_broadcast=True).parse_xl_double(success_messages=self.success_messages)
+        for recipient in request_params["recipients"]:
+            for message in self.success_messages:
+                valid_delivering_date = datetime.strptime(message["delivering_date"], self.fo.strftime_datatime_format)
+                if (int(message["phone_number"]) == int(recipient["phone_number"]) and
+                    message["delivering_date"]):
+                    print("True")
+
+
     
     def message_id_advanceed_succes(self, full_file_name=None):
         return self.fail_messages
