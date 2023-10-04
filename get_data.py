@@ -6,6 +6,7 @@ from openpyxl import load_workbook
 
 from createrp import RequestParams
 from phone import PhoneOperations
+from file_operations import FileOperations
 
 
 class GetData:
@@ -23,7 +24,7 @@ class GetData:
         
         phone_operations = PhoneOperations()
         for row in ws.iter_rows(min_row=3):
-            unp = row[0]
+            unp = row[11]
             company_name = row[1]
             debt_sum = row[4]
             phone_number = row[10]
@@ -42,14 +43,26 @@ class GetData:
                 if not valid_phone_number:
                     phone_operations.save_uncorrect_phone_number(unp=unp.value, company_name=company_name.value, phone_number=str(phone_number.value))
                 else:
-                    self.rp.create(phone_number=valid_phone_number, company_name=company_name.value, debt_sum=debt_sum.value)
+                    self.rp.create(phone_number=valid_phone_number,
+                                   company_name=company_name.value,
+                                   debt_sum=debt_sum.value,
+                                   unp=int(unp.value),
+                                   payment_date=payment_date.value)
+        fo = FileOperations()
+        copy_request_params = dict(self.rp.request_params)
+        fo.save_data(data=copy_request_params,
+                     path_to_folder=os.getenv("SAVE_VIRGIN_REQ_PAR_MASS_BROAD"))
         return self.rp.request_params
-    
+
     def parse_xl_double(self, success_messages:dict) -> list:
         request_params = self.parse_xl()
         return request_params
 
+    # def add_payment_date():
+
+
 
 if __name__ == "__main__":
     load_dotenv()
-    p = GetData(mass_broadcast=True).parse_xl_double(success_messages={})
+    p = GetData(mass_broadcast=True).parse_xl()
+    print(p)

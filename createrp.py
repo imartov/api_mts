@@ -29,13 +29,15 @@ class RequestParams:
                                                                        alpha_name=alpha_name,
                                                                        ttl=ttl)
 
-        def create(self, phone_number:int, company_name:str, debt_sum:str) -> dict:
+        def create(self, phone_number:int, company_name:str, debt_sum:str, unp:int, payment_date:str) -> dict:
             extra_id = create_extra_id()
             recipient = {
                 "phone_number": phone_number,
                 "extra_id": extra_id,
                 "company_name": company_name,
-                "debt_sum": debt_sum
+                "debt_sum": debt_sum,
+                "unp": unp,
+                "payment_date": payment_date
             }
             self.request_params["recipients"].append(recipient)
             return self.request_params
@@ -64,4 +66,4 @@ class RequestParams:
 
 
 if __name__ == "__main__":
-    pass
+    p = RequestParams.MassBroadcast().create()
