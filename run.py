@@ -37,15 +37,15 @@ class Run:
         file_operations = FileOperations()
         # try:
         request_params = GetData(mass_broadcast=True).parse_xl()
-        print(request_params)
         if sync:
             send_messages = message.send_broadcast_sync_mass_messages_and_get_report_by_message_id(request_params=request_params)
         else:
             send_messages = message.send_broadcast_mass_messages_and_get_report_by_job_id(request_params=request_params)
         response_data = send_messages["resp_message"]
         reports = send_messages["resp_report"]
-        file_operations.save_data_using_popular_api_methods(response_data=response_data,
-                                                            reports=reports)
+        file_operations.save_data_using_popular_api_methods(response_data=response_data)
+        file_operations.save_data(path_to_folder=os.getenv("SAVE_REPORTS_JOB_ID"))
+        
         cr = CheckReportJobId()
         fail_messages = cr.job_id_fail()[0]
         if fail_messages:

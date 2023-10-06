@@ -51,69 +51,68 @@ class CheckReportJobId:
             self.fo.save_data(data=self.fail_messages, path_to_folder=os.getenv("SAVE_FAIL_MESSAGES"))
         return self.fail_messages, self.success_messages
     
-    def get_success_messages(self, request_params=None, report=None):
-        if not request_params:
-            file_name, full_file_name = self.fo.create_file_name_by_date(path_to_folder=os.getenv("SAVE_VIRGIN_REQ_PAR_MASS_BROAD"))
-            with open(full_file_name, "r", encoding="utf-8") as file:
-                request_params = json.load(file).pop()
-        if not report:
-            file_name, full_file_name = self.fo.create_file_name_by_date(path_to_folder=os.getenv("SAVE_REPORTS_JOB_ID"))
-            with open(full_file_name, "r", encoding="utf-8") as file:
-                report = json.load(file).pop()
+    def get_success_messages(self, request_params=None, report=None) -> list:
 
+        def get_last_dict(path_to_folder:str) -> dict:
+            file_name = self.fo.create_file_name_by_date()
+            full_file_name = path_to_folder + "\\" + file_name
+            if file_name in os.listdir(path_to_folder):
+                with open(full_file_name, "r", encoding="utf-8") as file:
+                    data = json.load(file).pop()
+                return data
+
+        if not request_params:
+            request_params = get_last_dict(path_to_folder=os.getenv("SAVE_VIRGIN_REQ_PAR_MASS_BROAD"))
+            if not request_params:
+                return
+        if not report:
+            report = get_last_dict(path_to_folder=os.getenv("SAVE_REPORTS_JOB_ID"))
+        
         success_messages = []
         for message in report["messages"]:
             for recipient in request_params["recipients"]:
                 if message["extra_id"] == recipient["extra_id"]:
                     if (("status_text" in message and message["status_text"] == "SMS delivered") and
                         ("msg_status" in message and message["msg_status"] == 23011)):
-                        file_name = datetime.strptime(request_params["datetime"], self.fo.strftime_datatime_format)
-                        file_name = file_name.strftime("%d_%m_%Y") + ".json"
-                        full_file_name = os.getenv("SAVE_SUCCESS_MESSAGES") + file_name
-                        print(full_file_name)
-                        # success_messages.append(
-                        #     {
-                        #         valid_date: {
-
-                        #         }
-                        #     }
-                        # )
-
-            
+                        data = {
+                                "unp": recipient["unp"],
+                                "company_name": recipient["company_name"],
+                                "payment_date": recipient["payment_date"],
+                                "phone_number": recipient["phone_number"]
+                        }
+                        self.fo.save_data(data=data, path_to_folder=os.getenv("SAVE_SUCCESS_MESSAGES"))
+                        success_messages.append(data)
+        return success_messages
     
-    def job_id_double_mesasge(self, days=3):
-        ''' this method checks all job_id reports and rewrite file of success mass delivering '''
-        compare_date_format = "%d.%m.%Y"
-        for report_file_name in os.listdir(os.getenv("SAVE_REPORTS_JOB_ID")):
-            full_file_name = os.getenv("SAVE_REPORTS_JOB_ID") + "\\\\" + report_file_name
-            self.job_id_fail(full_file_name=full_file_name)[1]
-        self.fo.save_file(data_list=self.success_messages, full_file_name=os.getenv("SAVE_SUCCESS_MESSAGES"))
+    def get_double_request_params(self, request_params:dict, days=3) -> dict:
+        now = datetime.now().date()
+        check_day = now - timedelta(days=days)
+        files_list = os.listdir(os.getenv("SAVE_SUCCESS_MESSAGES"))
+        files_count = len(files_list)
+        check_files_list = []
+        prev_days = 0
+        for i in range(1, files_count+1):
+            check_day = check_day - timedelta(days=prev_days)
+            check_file = self.fo.create_file_name_by_date(date=check_day)
+            if check_file in files_list:
+                check_files_list.append(check_file)
+            prev_days += 1
 
-        request_params = GetData(mass_broadcast=True).parse_xl_double(success_messages=self.success_messages)
-        for recipient in request_params["recipients"]:
-            for message in self.success_messages:
-                valid_delivering_date = datetime.strptime(message["delivering_date"], self.fo.strftime_datatime_format).date()
-                delivering_date_sum_days = valid_delivering_date + timedelta(days=days)
-                today = datetime.now().date()
-                if (delivering_date_sum_days >= today and
-                    int(message["phone_number"]) == int(recipient["phone_number"])):
-                    print(True)
+        full_check_messages = []
+        for file_name in check_files_list:
+            full_file_name = os.getenv("SAVE_SUCCESS_MESSAGES") + file_name # maybe bag link path name in .env
+            with open(full_file_name, "r", encoding="utf-8") as file:
+                success_messages_list = json.load(file)
+            full_check_messages += success_messages_list
 
-                # print(delivering_date_sum_days, delivering_date_sum_days.__class__, today, today.__class__)
+        recipients = []
+        for message in full_check_messages:
+            for recipient in request_params["recipients"]:
+                if message["unp"] == recipient["unp"]:
+                    if message["payment_date"] == recipient["payment_date"]:
+                        recipients.append(recipient)
+        print(full_check_messages)
 
-
-                # if delivering_date_sum_days >= 
-                # print(delivering_date_sum_days)
-                # print(valid_delivering_date, date_sum_days)
-
-
-                # date_sum_days = valid_delivering_date.strftime("%d.%m.%Y")
-                # today = datetime.now().strftime("%d.%m.%Y")
-                # print(valid_delivering_date, valid_delivering_date.__class__, today, today.__class__)
-                # print(valid_delivering_date, datetime.now())
-                # if int(message["phone_number"]) == int(recipient["phone_number"]):
-                #     print("True")
-    
 
 class CheckRequestParams:
     def __init__(self) -> None:
@@ -122,5 +121,5 @@ class CheckRequestParams:
 
 
 if __name__ == "__main__":
-    p = CheckReportJobId().get_success_messages()
+    p = CheckReportJobId().get_double_request_params(request_params={}, days=1)
     print(p)

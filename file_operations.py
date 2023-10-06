@@ -10,14 +10,17 @@ class FileOperations:
         self.data_list = []
 
 
-    def create_file_name_by_date(self, path_to_folder:str, date=datetime.date.today()) -> dict:
+    def create_file_name_by_date(self, path_to_folder=None, date=datetime.date.today()) -> dict:
         ''' this method creates file name using defined date
         default defined date is today '''
         strftime_date = "%d/%m/%Y"
         file_extension = ".json"
         file_name = date.strftime(strftime_date).replace("/", "_") + file_extension
-        full_file_name = path_to_folder + "\\" + file_name
-        return file_name, full_file_name
+        if path_to_folder:
+            full_file_name = path_to_folder + "\\" + file_name
+            return file_name, full_file_name
+        else:
+            return file_name
 
 
     def save_data(self, data, path_to_folder:str) -> None:
