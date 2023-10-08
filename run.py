@@ -7,7 +7,7 @@ from api_mts import ApiMTS
 from get_data import GetData
 from file_operations import FileOperations
 from checking import CheckReportJobId
-from createrp import RequestParams
+from createrp import OneMessage
 
 
 # add logger
@@ -49,12 +49,12 @@ class Run:
         cr = CheckReportJobId()
         fail_messages = cr.job_id_fail()[0]
         if fail_messages:
-            get_save_req_par_and_send_mes(cl_rq=RequestParams.OneMessage().create(), send_mes=True)
+            get_save_req_par_and_send_mes(cl_rq=OneMessage().create(), send_mes=True)
         else:
             text = "Message delivering was succesfully"
-            get_save_req_par_and_send_mes(cl_rq=RequestParams.OneMessage(text_message=text).create(), send_mes=True)
+            get_save_req_par_and_send_mes(cl_rq=OneMessage(text_message=text).create(), send_mes=True)
         # except:
-        #     get_save_req_par_and_send_mes(cl_rq=RequestParams.OneMessage().create(), send_mes=True)
+        #     get_save_req_par_and_send_mes(cl_rq=OneMessage().create(), send_mes=True)
 
 
 if __name__ == "__main__":
