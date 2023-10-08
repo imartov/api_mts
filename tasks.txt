@@ -1,21 +1,4 @@
-1. Парсит репорты, и если успешно забирает:
-    1.1. номер телефона
-    1.2. дату рассылки
-2. Помещает в отдельный файл json
-3. Парсит excel файл и идентифицирует клиентов, кот. напр. смс, по номеру телефона из файла, и забирает:
-    3.1. company_id
-    3.2. дату оплаты
-    3.3. номер телефона
-4. Помещает данные из предыдущего шага в файл на втором шаге
-5. На выходе получается json-файл, содержащий список с элементами в виде словарей с данными:
-    5.1. номер телефона
-    5.2. дату рассылки
-    5.3. дату оплаты
-    5.4. company_id
-    5.5. булевое значение double_message = False
-6. Парсит excel-файл:
-    6.1. если дата оплаты (excel) равна дате оплаты (json) и рассылка была три дня назад и более и double_message = False:
-        добавляет данные в request_params
-        double_message = True
-    6.2. иначе:
-        continue
+Check-list:
+1. request_params = success_double_request_params
+2. request_params part equal success_double_request_params
+3. request_params full != success_double_request_params

@@ -100,3 +100,5 @@ class CheckRequestParams:
 if __name__ == "__main__":
     p = CheckReportJobId().get_success_messages(double=True)
     print(p)
+    # TODO: create method for change same debtor in 3-days (first) list if updated payment_day
+    # TODO: create method for to drop recipients of 3-days list when for request_params if before 3 day

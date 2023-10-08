@@ -89,7 +89,9 @@ class MassBroadcast:
         fo = FileOperations()
         files_count = len(files_list)
         check_files_list = []
-        if not double:
+        if double:
+            check_files_list = files_list
+        else:
             now = datetime.now().date()
             check_day = now - timedelta(days=days)
             prev_days = 0
@@ -99,8 +101,6 @@ class MassBroadcast:
                 if check_file in files_list:
                     check_files_list.append(check_file)
                 prev_days += 1
-            else:
-                check_files_list = files_list
 
         full_check_messages = []
         for file_name in check_files_list:
@@ -116,7 +116,7 @@ class MassBroadcast:
                 if message["unp"] == recipient["unp"] and message["unp"] not in exist_unp_recipients:
                     if message["payment_date"] == recipient["payment_date"]:
                         exist_unp_recipients.append(message["unp"])
-                        double_recipients.append(recipient) 
+                        double_recipients.append(recipient)
         
         if double_recipients:
             with open(os.getenv("PATH_EXAM_MASS_BRO_DOUBLE_TEXT_MESS"), "r", encoding="utf-8") as file:
@@ -142,9 +142,6 @@ class MassBroadcast:
             return first_request_params, double_request_params
         else:
             return None, double_request_params
-        
-    def get_request_params_minus_sent(self, request_params:dict) -> dict:
-        pass
 
 
 class OneMessage:
@@ -172,8 +169,9 @@ class OneMessage:
 
 
 if __name__ == "__main__":
-    full_file_name = "C:\\Program Files\\SMS\\api_mts\\test_data\\virgin_request_params\\mass_broadcast\\06_10_2023.json"
+    full_file_name = "C:\\Program Files\\SMS\\api_mts\\test_data\\virgin_request_params\\mass_broadcast\\double\\06_10_2023.json"
     with open(full_file_name, "r", encoding="utf-8") as file:
         request_params = json.load(file).pop()
-    p = MassBroadcast().get_first_and_double_request_params(request_params=request_params, days=1)
-    print(p)
+    request_params, double_request_params = MassBroadcast().get_first_and_double_request_params(request_params=request_params, double=True)
+    print('request_params: ', request_params)
+    print('double_request_params: ', double_request_params)
