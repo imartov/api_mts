@@ -4,7 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from openpyxl import load_workbook
 
-from createrp import RequestParams
+from createrp import MassBroadcast, OneMessage
 from phone import PhoneOperations
 from file_operations import FileOperations
 
@@ -12,10 +12,10 @@ from file_operations import FileOperations
 class GetData:
     def __init__(self, mass_broadcast=False, one_message=False) -> None:
         if mass_broadcast:
-            self.rp = RequestParams.MassBroadcast()
+            self.rp = MassBroadcast()
             del self.rp.request_params["recipients"][0]
         elif one_message:
-            self.rp = RequestParams.OneMessage()
+            self.rp = OneMessage()
 
     def parse_xl(self) -> dict:
         ''' open excel file and parse it '''
