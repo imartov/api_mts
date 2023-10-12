@@ -16,6 +16,7 @@ class GetData:
             del self.rp.request_params["recipients"][0]
         elif one_message:
             self.rp = OneMessage()
+        load_dotenv()
 
     def parse_xl(self) -> dict:
         ''' open excel file and parse it '''
@@ -57,12 +58,13 @@ class GetData:
     def parse_xl_double(self, success_messages:dict) -> list:
         request_params = self.parse_xl()
         return request_params
-
-    # def add_payment_date():
-
+    
+    def get_success_messages(self, double=False):
+        file_success_messages = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
+        with open(os.getenv(file_success_messages), "r", encoding="utf-8") as file:
+            success_messages = json.load(file)
+        return success_messages
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    p = GetData(mass_broadcast=True).parse_xl()
-    print(p)
+    pass

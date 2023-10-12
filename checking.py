@@ -49,10 +49,10 @@ class CheckReportJobId:
             self.fo.save_data(data=self.fail_messages, path_to_folder=os.getenv("SAVE_FAIL_MESSAGES"))
         return self.fail_messages, self.success_messages
     
-    def get_success_messages(self,
-                             request_params=None,
-                             report=None,
-                             double=None) -> list:
+    def create_update_success_messages(self,
+                                       request_params=None,
+                                       report=None,
+                                       double=None) -> list:
 
         def get_last_dict(path_to_folder:str) -> dict:
             file_name = self.fo.create_file_name_by_date()
@@ -65,6 +65,7 @@ class CheckReportJobId:
         path_reqpar = "SAVE_DOUBLE_VIRGIN_REQ_PAR_MASS_BROAD" if double else "SAVE_FIRST_VIRGIN_REQ_PAR_MASS_BROAD"
         path_report = "SAVE_DOUBLE_REPORTS_JOB_ID" if double else "SAVE_FIRST_REPORTS_JOB_ID"
         path_save = "SAVE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_SUCCESS_MESSAGES_FIRST"
+        path_file = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
 
         if not request_params:
             request_params = get_last_dict(path_to_folder=os.getenv(path_reqpar))
@@ -75,6 +76,9 @@ class CheckReportJobId:
             if not report:
                 return
         
+        with open(os.getenv(path_file), "r", encoding="utf-8") as file:
+            all_success_messages = json.load(file)
+
         success_messages = []
         for message in report["messages"]:
             for recipient in request_params["recipients"]:
@@ -88,8 +92,17 @@ class CheckReportJobId:
                                 "phone_number": recipient["phone_number"]
                         }
                         self.fo.save_data(data=data, path_to_folder=os.getenv(path_save))
+
+                        if str(recipient["unp"]) not in all_success_messages:
+                            all_success_messages[str(recipient["unp"])] = {
+                                "company_name": recipient["company_name"],
+                                "payment_date": recipient["payment_date"],
+                                "phone_number": recipient["phone_number"]
+                            }
                         success_messages.append(data)
-        return success_messages
+
+        with open(os.getenv(path_file), "w", encoding="utf-8") as file:
+            json.dump(all_success_messages, file, indent=4, ensure_ascii=False)
 
 
 class CheckRequestParams:

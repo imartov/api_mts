@@ -85,12 +85,14 @@ class MassBroadcast:
          if double=True returned dict of requests params uncludes recipients that double
          message delivering was sent and they haven't to get a message on this delivering '''
         path_success = "SAVE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_SUCCESS_MESSAGES_FIRST"
+        print('path_success: ', path_success)
         files_list = os.listdir(os.getenv(path_success))
         fo = FileOperations()
         files_count = len(files_list)
         check_files_list = []
         if double:
             check_files_list = files_list
+            print('check_files_list: ', check_files_list)
         else:
             now = datetime.now().date()
             check_day = now - timedelta(days=days)
@@ -108,6 +110,7 @@ class MassBroadcast:
             with open(full_file_name, "r", encoding="utf-8") as file:
                 success_messages_list = json.load(file)
             full_check_messages += success_messages_list
+            print(full_check_messages)
 
         exist_unp_recipients = []
         double_recipients = []
@@ -117,6 +120,7 @@ class MassBroadcast:
                     if message["payment_date"] == recipient["payment_date"]:
                         exist_unp_recipients.append(message["unp"])
                         double_recipients.append(recipient)
+        print('double_recipients: ', double_recipients)
         
         if double_recipients:
             with open(os.getenv("PATH_EXAM_MASS_BRO_DOUBLE_TEXT_MESS"), "r", encoding="utf-8") as file:
@@ -169,9 +173,4 @@ class OneMessage:
 
 
 if __name__ == "__main__":
-    full_file_name = "C:\\Program Files\\SMS\\api_mts\\test_data\\virgin_request_params\\mass_broadcast\\double\\06_10_2023.json"
-    with open(full_file_name, "r", encoding="utf-8") as file:
-        request_params = json.load(file).pop()
-    request_params, double_request_params = MassBroadcast().get_first_and_double_request_params(request_params=request_params, double=True)
-    print('request_params: ', request_params)
-    print('double_request_params: ', double_request_params)
+    pass
