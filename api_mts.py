@@ -136,5 +136,4 @@ class ApiMTS:
 
 
 if __name__ == "__main__":
-    p = ApiMTS()
-    p.get_url(by="GR_JOB_ID", var="12345")
+    pass

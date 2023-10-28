@@ -6,19 +6,6 @@ class PhoneOperations:
 
     def __init__(self) -> None:
         pass
-
-    def save_uncorrect_phone_number(self, unp:str, company_name:str, phone_number:str):
-        load_dotenv()
-        with open(os.getenv("PATH_UNCORRECT_PHONE_NUMBERS"), "r", encoding="utf-8") as file:
-            uncorrect_phone_numbers = json.load(file)
-            unp_list = []
-            for company_data in uncorrect_phone_numbers:
-                unp_list.append(company_data[0])
-            if unp not in unp_list:
-                uncorrect_phone_numbers.append((unp, company_name, phone_number))
-
-            with open(os.getenv("PATH_UNCORRECT_PHONE_NUMBERS"), "w", encoding="utf-8") as file:
-                json.dump(uncorrect_phone_numbers, file, indent=4, ensure_ascii=False)
     
     def make_valid_phone_number(self, unp:str, company_name:str, phone_number:str):
         ''' method gets any phone number and change

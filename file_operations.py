@@ -9,7 +9,6 @@ class FileOperations:
         self.strftime_datatime_format = "%d.%m.%Y %H:%M:%S"
         self.data_list = []
 
-
     def create_file_name_by_date(self, path_to_folder=None, date=datetime.date.today()) -> dict:
         ''' this method creates file name using defined date
         default defined date is today '''
@@ -22,7 +21,6 @@ class FileOperations:
         else:
             return file_name
 
-
     def save_data(self, data, path_to_folder:str) -> None:
         ''' defining if file exists and add current time '''
         if data.__class__ == {}.__class__:
@@ -33,15 +31,12 @@ class FileOperations:
             self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
             self.next_save_data(data, full_file_name=full_file_name)
-        # return data
-
 
     def save_file(self, data_list:list, full_file_name:str) -> None:
         ''' save list to file and run if file doesn't exist'''
         with open(full_file_name, "w", encoding="utf-8") as file:
             json.dump(data_list, file, ensure_ascii=False, indent=4)
         self.data_list = []
-
 
     def next_save_data(self, data, full_file_name:str) -> None:
         ''' method opens exist file and rewrite it by adding new data '''
@@ -50,7 +45,6 @@ class FileOperations:
         self.data_list.append(data)
         self.save_file(data_list=self.data_list, full_file_name=full_file_name)
 
-
     def save_data_using_popular_api_methods(self, **kwargs) -> None:
         ''' this method saves data that return after using
          popular methods in api_mts.py '''
@@ -58,7 +52,6 @@ class FileOperations:
         for key, value in kwargs.items():
             path_to_folder = "SAVE_" + str(key).upper()
             self.save_data(data=value, path_to_folder=os.getenv(path_to_folder))
-
 
     def delete_file(self, paths_to_folders:list, count_days=30) -> None:
         ''' this method removes file that was created defined days ago '''
@@ -69,6 +62,23 @@ class FileOperations:
                 os.remove(delete_file_tuple[1])
         # TODO: any include
 
+    def get_last_dict(self, path_to_folder:str) -> dict:
+        file_name = self.create_file_name_by_date()
+        print(file_name)
+        full_file_name = path_to_folder + "\\" + file_name
+        if file_name in os.listdir(path_to_folder):
+            with open(full_file_name, "r", encoding="utf-8") as file:
+                data = json.load(file).pop()
+            return data
+        
+    def get_data_from_json_file(self, path_to_file) -> dict:
+        with open(path_to_file, "r", encoding="utf-8") as file:
+            messages = json.load(file)
+        return messages
+
+
+def main() -> None:
+    pass
 
 if __name__ == "__main":
-    pass
+    main()

@@ -172,5 +172,9 @@ class OneMessage:
         return self.request_params
 
 
+def main() -> None:
+    cr = MassBroadcast()
+    cr.get_request_params_minus_success_messages()
+
 if __name__ == "__main__":
-    pass
+    main()
