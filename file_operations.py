@@ -23,14 +23,15 @@ class FileOperations:
 
     def save_data(self, data, path_to_folder:str) -> None:
         ''' defining if file exists and add current time '''
+        copy_data = dict(data) if data.__class__ == {}.__class__ else data.copy()
         if data.__class__ == {}.__class__:
-            data["datetime"] = datetime.datetime.now().strftime(self.strftime_datatime_format)
+            copy_data["datetime"] = datetime.datetime.now().strftime(self.strftime_datatime_format)
         file_name, full_file_name = self.create_file_name_by_date(path_to_folder=path_to_folder)
         if file_name not in os.listdir(path_to_folder):
-            self.data_list.append(data)
+            self.data_list.append(copy_data)
             self.save_file(data_list=self.data_list, full_file_name=full_file_name)
         else:
-            self.next_save_data(data, full_file_name=full_file_name)
+            self.next_save_data(copy_data, full_file_name=full_file_name)
 
     def save_file(self, data_list:list, full_file_name:str) -> None:
         ''' save list to file and run if file doesn't exist'''
@@ -62,17 +63,21 @@ class FileOperations:
                 os.remove(delete_file_tuple[1])
         # TODO: any include
 
-    def get_last_dict(self, path_to_folder:str) -> dict:
-        file_name = self.create_file_name_by_date()
-        print(file_name)
-        full_file_name = path_to_folder + "\\" + file_name
-        if file_name in os.listdir(path_to_folder):
-            with open(full_file_name, "r", encoding="utf-8") as file:
-                data = json.load(file).pop()
+    def get_last_element(self, path_folder=None, path_file=None, mylist=None) -> dict:
+        if path_file:
+            data = self.get_data_from_json_file(path_file=path_file).pop()
             return data
+        elif mylist:
+            return mylist.pop()
+        else:
+            file_name = self.create_file_name_by_date()
+            full_file_name = path_folder + "\\" + file_name
+            if file_name in os.listdir(path_folder):
+                data = self.get_data_from_json_file(path_file=full_file_name).pop()
+                return data
         
-    def get_data_from_json_file(self, path_to_file) -> dict:
-        with open(path_to_file, "r", encoding="utf-8") as file:
+    def get_data_from_json_file(self, path_file) -> dict:
+        with open(path_file, "r", encoding="utf-8") as file:
             messages = json.load(file)
         return messages
 
