@@ -1,25 +1,16 @@
 from datetime import datetime
 import json, os
 from dotenv import load_dotenv
+from file_operations import FileOperations
 
 
-def test(unp):
+def test():
     load_dotenv()
-    path_file = "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
-    with open(os.getenv(path_file), "r", encoding="utf-8") as file:
-        all_success_messages = json.load(file)
+    fo = FileOperations()
+    fo.save_file(full_file_name="\\Bymnssrvlnk2\\sms\\api_mts\\test_file.json", data_list={})
 
-    if str(unp) not in all_success_messages:
-        print("unp is not exist")
-        all_success_messages[str(unp)] = {
-            "company_name": "company_name",
-            "payment_date": "payment_date",
-            "phone_number": "phone_number"
-        }
-        with open(os.getenv(path_file), "w", encoding="utf-8") as file:
-            json.dump(all_success_messages, file, indent=4, ensure_ascii=False)
-    else:
-        print("unp is exist")
+def main() -> None:
+    test()
 
 if __name__ == "__main__":
-    test(unp=1000564284)
+    main()

@@ -33,8 +33,8 @@ class FileOperations:
         else:
             self.next_save_data(copy_data, full_file_name=full_file_name)
 
-    def save_file(self, data_list:list, full_file_name:str) -> None:
-        ''' save list to file and run if file doesn't exist'''
+    def save_file(self, data_list, full_file_name:str) -> None:
+        ''' this method create or rewrite json file'''
         with open(full_file_name, "w", encoding="utf-8") as file:
             json.dump(data_list, file, ensure_ascii=False, indent=4)
         self.data_list = []

@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 from file_operations import FileOperations
-from get_data import GetData
 
+
+fo = FileOperations()
 
 class CheckReportJobId:
     ''' this class is for checking reports and finding error messages '''
@@ -13,14 +14,13 @@ class CheckReportJobId:
         self.error_code_status = (1, 3)
         self.error_code_substatus = (10, 12, 24, 28, 35, 36)
         self.error_code_msg_status = (36011, 35015, 36021, 36031, 12011, 36041, 36051)
-        self.fo = FileOperations()
         load_dotenv()
     
-    def create_update_success_messages(self,
-                                       request_params=None,
-                                       report=None,
-                                       double=False,
-                                       days=3) -> None:
+    def create_update_success_fail_messages(self,
+                                            request_params=None,
+                                            report=None,
+                                            double=False,
+                                            days=3) -> None:
         ''' this method checks request_params and reports and
         define success messages and fail messages and:
         1. rewrite success_messages.json
@@ -34,110 +34,128 @@ class CheckReportJobId:
 
         path_reqpar = "SAVE_DOUBLE_REQ_PAR_MASS_BROAD" if double else "SAVE_FIRST_REQ_PAR_MASS_BROAD"
         path_report = "SAVE_DOUBLE_REPORTS_JOB_ID" if double else "SAVE_FIRST_REPORTS_JOB_ID"
-        path_save = "SAVE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_SUCCESS_MESSAGES_FIRST"
-        path_file = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
-        check_day = datetime.today().date() - timedelta(days=days)
 
         if not request_params:
-            request_params = self.fo.get_last_element(path_to_folder=os.getenv(path_reqpar))
+            request_params = fo.get_last_element(path_to_folder=os.getenv(path_reqpar))
             if not request_params:
                 return
         if not report:
-            report = self.fo.get_last_element(path_to_folder=os.getenv(path_report))
+            report = fo.get_last_element(path_to_folder=os.getenv(path_report))
             if not report:
                 return
-        
-        all_success_messages = self.fo.get_data_from_json_file(path_file=os.getenv(path_file))
-        all_fail_messages = self.fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
-        last_message_time = datetime.strftime(datetime.fromtimestamp(report["messages"][-1]["time"] / 1000),
-                                              self.fo.strftime_datatime_format)
-        date_time = request_params["datetime"] if "datetime" in request_params else last_message_time
-        check_day = datetime.strptime(last_message_time, self.fo.strftime_datatime_format).date() - timedelta(days=days)
 
+        last_message_time = datetime.strftime(datetime.fromtimestamp(report["messages"][-1]["time"] / 1000),
+                                              fo.strftime_datatime_format)
+        date_time = request_params["datetime"] if "datetime" in request_params else last_message_time
+        check_day = datetime.strptime(date_time, fo.strftime_datatime_format).date() - timedelta(days=days)
+
+        temp_success_messages = {}
+        temp_fail_messages = {}
+        
         for message in report["messages"]:
             for recipient in request_params["recipients"]:
+                str_unp = str(recipient["unp"])
                 if message["extra_id"] == recipient["extra_id"]:
                     # save success messages
                     if (("status_text" in message and message["status_text"] == "SMS delivered") and
                         ("msg_status" in message and message["msg_status"] == 23011)):
-                        
-                        # write into file by date success messages
-                        data = {}
-                        data[str(recipient["unp"])] = {
+                        temp_success_messages[str_unp] = {
                             "company_name": recipient["company_name"],
                             "payment_date": recipient["payment_date"],
                             "phone_number": recipient["phone_number"],
                             "extra_id": recipient["extra_id"],
                             "delivering_date": date_time
                         }
-                        print(data)
-                        self.fo.save_data(data=data, path_to_folder=os.getenv(path_save))
+                    # save fail messages
+                    else:
+                        temp_fail_messages[str_unp] = {
+                            "company_name": recipient["company_name"],
+                            "payment_date": recipient["payment_date"],
+                            "phone_number": recipient["phone_number"],
+                            "extra_id": recipient["extra_id"],
+                            "delivering_date": date_time
+                        }
 
-                        # delete from fail_messages.json the message if it was success
-                        if str(recipient["unp"]) in all_fail_messages:
-                            if recipient["payment_date"] == all_success_messages[str(recipient["unp"])]["payment_date"]:
-                                del all_fail_messages[str(recipient["unp"])]
-                            else:
-                                # update message in success_messages.json if payment_date != payment_date
-                                all_success_messages[str(recipient["unp"])] = {
-                                    "company_name": recipient["company_name"],
-                                    "payment_date": recipient["payment_date"],
-                                    "phone_number": recipient["phone_number"],
-                                    "extra_id": recipient["extra_id"],
-                                    "delivering_date": date_time
-                                }
-                        
-        #                 # write into success_messages.json if unp doesn't exist in success_messages.json
-        #                 elif str(recipient["unp"]) not in all_success_messages:
-        #                     all_success_messages[str(recipient["unp"])] = {
-        #                         "company_name": recipient["company_name"],
-        #                         "payment_date": recipient["payment_date"],
-        #                         "phone_number": recipient["phone_number"],
-        #                         "extra_id": recipient["extra_id"],
-        #                         "delivering_date": date_time
-        #                     }
-        #             # save fail messages
-        #             else:
-        #                 # write into file by date fail messages
-        #                 data = {}
-        #                 data[str(recipient["unp"])] = {
-        #                     "company_name": recipient["company_name"],
-        #                     "payment_date": recipient["payment_date"],
-        #                     "phone_number": recipient["phone_number"],
-        #                     "extra_id": recipient["extra_id"],
-        #                     "delivering_date": date_time
-        #                 }
-        #                 self.fo.save_data(data=data, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
+        fo.save_file(data_list=temp_success_messages, full_file_name=os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
+        fo.save_file(data_list=temp_fail_messages, full_file_name=os.getenv("TEMP_SENT_FAIL_MESSAGES"))
 
-        #                 # delete from success_messages.json the message if it was fail
-        #                 if str(recipient["unp"]) in all_success_messages:
-        #                     del all_success_messages[str(recipient["unp"])]
+        path_save = "SAVE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_SUCCESS_MESSAGES_FIRST"
+        path_file = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
 
-        #                 # update message in fail_messages.json if payment_date != payment_date
-        #                 if str(recipient["unp"]) in all_fail_messages:
-        #                     if recipient["payment_date"] != all_fail_messages[str(recipient["unp"])]["payment_date"]:
-        #                         all_fail_messages[str(recipient["unp"])] = {
-        #                             "company_name": recipient["company_name"],
-        #                             "payment_date": recipient["payment_date"],
-        #                             "phone_number": recipient["phone_number"],
-        #                             "extra_id": recipient["extra_id"],
-        #                             "delivering_date": date_time
-        #                         }
-                        
-        #                 # write into fail_messages.json if unp doesn't exist in fail_messages.json
-        #                 elif str(recipient["unp"]) not in all_fail_messages:
-        #                     all_fail_messages[str(recipient["unp"])] = {
-        #                         "company_name": recipient["company_name"],
-        #                         "payment_date": recipient["payment_date"],
-        #                         "phone_number": recipient["phone_number"],
-        #                         "extra_id": recipient["extra_id"],
-        #                         "delivering_date": date_time
-        #                     }
+        # pass, update and delet all_success_messages (success_messages.json)
+        all_success_messages = fo.get_data_from_json_file(path_file=os.getenv(path_file))
+        for unp, deliv_data in temp_success_messages.items():
+            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv(path_save))
 
-        # with open(os.getenv(path_file), "w", encoding="utf-8") as file:
-        #     json.dump(all_success_messages, file, indent=4, ensure_ascii=False)
-        # with open(os.getenv("FILE_FAIL_MESSAGES"), "w", encoding="utf-8") as file:
-        #     json.dump(all_fail_messages, file, indent=4, ensure_ascii=False)
+            if unp not in all_success_messages:
+                all_success_messages[unp] = deliv_data
+            else:
+                rq_pay_date = datetime.strptime(deliv_data["payment_date"], "%d.%m.%Y").date()
+                sm_pay_date = datetime.strptime(all_success_messages[unp]["payment_date"], "%d.%m.%Y").date()
+                if rq_pay_date > sm_pay_date:
+                    deliv_success_message_date = datetime.strptime(all_success_messages[str_unp]["delivering_date"],
+                                                                    fo.strftime_datatime_format).date()
+                    if not double and deliv_success_message_date <= check_day:
+                        del all_success_messages[unp]
+                    else:
+                        all_success_messages[unp] = deliv_data
+        os.remove(os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
+        
+        all_fail_messages = fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
+        for unp, deliv_data in temp_fail_messages.items():
+            # write into file by date fail messages (create file)
+            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
+
+            # pass and update all_fail_messages (fail_messages.json)
+            if unp not in all_fail_messages:
+                all_fail_messages[unp] = deliv_data
+            else:
+                rq_pay_date = datetime.strptime(deliv_data["payment_date"], "%d.%m.%Y").date()
+                sm_pay_date = datetime.strptime(all_fail_messages[unp]["payment_date"], "%d.%m.%Y").date()
+                if rq_pay_date > sm_pay_date:
+                    all_fail_messages[str_unp] = deliv_data
+        os.remove(os.getenv("TEMP_SENT_FAIL_MESSAGES"))
+
+        fo.save_file(data_list=all_success_messages, full_file_name=os.getenv(path_file))
+        fo.save_file(data_list=all_fail_messages, full_file_name=os.getenv("FILE_FAIL_MESSAGES"))
+
+    def check_exist_success_message(self, unp:str, payment_date:str, days=3, double=None) -> bool:
+        ''' this method checks if debtor exists in success_messages
+        if method returns True the debtor exists in success_messages and it shouldn't pass to request_params
+        if method returns False debtor doesn't exist in success_messages or it exists in first_success_messages
+        but it must be get a double message '''
+        success_messages_file_name = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
+        success_messages = fo.get_data_from_json_file(path_file=os.getenv(success_messages_file_name))
+        check_day = datetime.now().date() - timedelta(days=days)
+        if unp in success_messages:
+            rq_payment_date = datetime.strptime(payment_date, "%d.%m.%Y").date()
+            sm_payment_date = datetime.strptime(success_messages[unp]["payment_date"], "%d.%m.%Y").date()
+            if rq_payment_date > sm_payment_date:
+                return False
+            else:
+                delivering_date = datetime.strptime(success_messages[unp]["delivering_date"],
+                                                    fo.strftime_datatime_format).date()
+                if not double and check_day >= delivering_date:
+                    return False
+                return True
+            
+    def remove_success_messages(self, double=False) -> None:
+        ''' this method compares messages of first_success_messages.json
+        and double_success_messages.json and if one recipient is in both 
+        messages the method removes that have earlier delivering_date'''
+        path_success_file_name_save = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
+        path_success_file_name_remove = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if not double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
+        
+        success_messages_save = fo.get_data_from_json_file(path_file=os.getenv(path_success_file_name_save))
+        success_messages_remove = fo.get_data_from_json_file(path_file=os.getenv(path_success_file_name_remove))
+
+        for unp, success_data_save in success_messages_save.items():
+            if unp in success_messages_remove:
+                deliv_date_save = datetime.strptime(success_data_save["delivering_date"], fo.strftime_datatime_format).date()
+                deliv_date_remove = datetime.strptime(success_messages_remove[unp]["delivering_date"], fo.strftime_datatime_format).date()
+                if deliv_date_save > deliv_date_remove:
+                    del success_messages_remove[unp]
+        fo.save_file(data_list=success_messages_remove, full_file_name=os.getenv(path_success_file_name_remove))
 
 
 class CheckRequestParams:
@@ -147,15 +165,7 @@ class CheckRequestParams:
 
 if __name__ == "__main__":
     fo = FileOperations()
-    rq = fo.get_last_element(path_file="test_data\\request_params\\mass_broadcast\\double\\29_10_2023.json")
-    report = fo.get_last_element(path_file="sent_messages\\reports\job_id\\double\\29_10_2023.json")
+    rq = fo.get_last_element(path_file="test_data\\request_params\\mass_broadcast\\first\\01_11_2023.json")
+    report = fo.get_last_element(path_file="sent_messages\\reports\\job_id\\first\\01_11_2023.json")
     cr = CheckReportJobId()
-    cr.create_update_success_messages(request_params=rq, report=report, double=True)
-
-
-
-
-
-
-    # TODO: create method for change same debtor in 3-days (first) list if updated payment_day
-    # TODO: create method for to drop recipients of 3-days list when for request_params if before 3 day
+    cr.create_update_success_fail_messages(request_params=rq, report=report)

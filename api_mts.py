@@ -4,6 +4,8 @@ import certifi
 import requests
 from dotenv import load_dotenv
 from file_operations import FileOperations
+from utils import create_extra_id
+from createrp import OneMessage
 
 
 class ApiMTS:
@@ -71,6 +73,9 @@ class ApiMTS:
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
          by broadcast and get report by job_id for full company '''
+        if not request_params["recipients"]:
+            print("Recipients don't exist")
+            return
         _message = self.send_message(by="SM_MASS_BROADCAST", request_params=request_params)
         message_resp_json = _message["response_json"]
         job_id = message_resp_json["job_id"].strip()
@@ -111,29 +116,24 @@ class ApiMTS:
                 "gr_http_code": _report["http_code"]}
         
 
-    def notice_exception(self, text_exception:str) -> None:
+    def notice_report(self, fail=False) -> None:
         ''' this method sends to defined phone number notice 
         abut exceptions during running key methods '''
-        load_dotenv()
-        with open(os.getenv("NOTICE_EXCEPTION_TEXT_MESSAGE_SMS"), "r", encoding="utf-8") as file:
-            text_message = file.read()
-            text_message = text_message.format(text_exception=text_exception)
-        
-        with open(os.getenv("NOTICE_EXCEPTION_REQUEST_PARAMS_SMS"), "r", encoding="utf-8") as file:
-            request_params = json.load(file)
+        path_text_file_name = "NOTICE_SMS_FAIL_TEXT" if fail else "NOTICE_SMS_SUCCESS_TEXT"
+        with open(os.getenv(path_text_file_name), "r", encoding="utf-8") as file:
+            text = file.read()
+        onemes = OneMessage(text_message=text)
+        request_params = onemes.create()
+        send_message = self.send_one_message_and_get_report_by_message_id(request_params=request_params)
+        fo = FileOperations()
+        fo.save_data(data=request_params, path_to_folder=os.getenv("SAVE_REQ_PAR_ONE_MESS"))
+        fo.save_data(data=send_message["resp_message"], path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
+        fo.save_data(data=send_message["resp_report"], path_to_folder=os.getenv("SAVE_REPORTS_ONE_MESSAGE"))
 
-            request_params["phone_number"] = int(os.getenv("INFO_PHONE_NUMBER"))
-            alpha_name = os.getenv("ALPHA_NAME")
-            request_params["channel_options"]["sms"]["text"] = text_message
-            request_params["channel_options"]["sms"]["alpha_name"] = alpha_name
 
-        message = self.send_one_message_and_get_report_by_message_id(request_params=request_params)
-
-        file_operations = FileOperations()
-        file_operations.save_data_using_popular_api_methods(resp_message=message["resp_message"],
-                                                            resp_report=message["resp_report"],
-                                                            request_params=request_params)
-
+def main() -> None:
+    apimts = ApiMTS()
+    apimts.notice_report()
 
 if __name__ == "__main__":
-    pass
+    main()

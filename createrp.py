@@ -7,6 +7,7 @@ from utils import create_extra_id, get_request_params_minus_messages
 from file_operations import FileOperations
 
 
+fo = FileOperations()
 load_dotenv()
 
 def set_authorization_data(request_params:dict,
@@ -68,7 +69,6 @@ class MassBroadcast:
     def get_first_and_double_request_params(self, request_params:dict, days=3, minus=True) -> dict:
         ''' this method returns first request_params and double request params.
         If minus=True the method will return first request_param minus double request params '''
-        fo = FileOperations()
         all_first_success_messages = fo.get_data_from_json_file(path_file=os.getenv("SAVE_FILE_SUCCESS_MESSAGES_FIRST"))
         check_day = datetime.today().date() - timedelta(days=days)
         minus_recipients = {}
@@ -81,7 +81,6 @@ class MassBroadcast:
                                                         fo.strftime_datatime_format).date()
                     if delivering_date <= check_day:
                         double_recipients.append(recipient)
-                        del all_first_success_messages[str_unp]
                         if minus:
                             minus_recipients[str_unp] = {
                                 "company_name": recipient["company_name"],
@@ -110,8 +109,7 @@ class MassBroadcast:
 
 class OneMessage:
     def __init__(self, text_message=None, alpha_name=None, ttl=300) -> None:
-        with open(os.getenv("PATH_EXAM_ONE_MESS_REQ_PAR"), "r", encoding="utf-8") as file:
-            self.request_params = json.load(file)
+        self.request_params = fo.get_data_from_json_file(path_file=os.getenv("PATH_EXAM_ONE_MESS_REQ_PAR"))    
         if not text_message:
             with open(os.getenv("PATH_EXAM_ONE_MESS_TEXT_MESS"), "r", encoding="utf-8") as file:
                 text_message = file.read()
@@ -119,12 +117,12 @@ class OneMessage:
         else:
             self.request_params["channel_options"]["sms"]["text"] = text_message
         self.request_params = set_authorization_data(request_params=self.request_params,
-                                                    alpha_name=alpha_name,
-                                                    ttl=ttl)
+                                                     alpha_name=alpha_name,
+                                                     ttl=ttl)
     
     def create(self, phone_number=None) -> dict:
         if not phone_number:
-            phone_number = os.getenv("INFO_PHONE_NUMBER")
+            phone_number = int(os.getenv("INFO_PHONE_NUMBER"))
             self.request_params["phone_number"] = phone_number
         else:
             self.request_params["phone_number"] = phone_number
