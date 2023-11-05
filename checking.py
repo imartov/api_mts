@@ -86,34 +86,14 @@ class CheckReportJobId:
         all_success_messages = fo.get_data_from_json_file(path_file=os.getenv(path_file))
         for unp, deliv_data in temp_success_messages.items():
             fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv(path_save))
-
-            if unp not in all_success_messages:
-                all_success_messages[unp] = deliv_data
-            else:
-                rq_pay_date = datetime.strptime(deliv_data["payment_date"], "%d.%m.%Y").date()
-                sm_pay_date = datetime.strptime(all_success_messages[unp]["payment_date"], "%d.%m.%Y").date()
-                if rq_pay_date > sm_pay_date:
-                    deliv_success_message_date = datetime.strptime(all_success_messages[str_unp]["delivering_date"],
-                                                                    fo.strftime_datatime_format).date()
-                    if not double and deliv_success_message_date <= check_day:
-                        del all_success_messages[unp]
-                    else:
-                        all_success_messages[unp] = deliv_data
+            all_success_messages[unp] = deliv_data
         os.remove(os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
         
         all_fail_messages = fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
         for unp, deliv_data in temp_fail_messages.items():
             # write into file by date fail messages (create file)
             fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
-
-            # pass and update all_fail_messages (fail_messages.json)
-            if unp not in all_fail_messages:
-                all_fail_messages[unp] = deliv_data
-            else:
-                rq_pay_date = datetime.strptime(deliv_data["payment_date"], "%d.%m.%Y").date()
-                sm_pay_date = datetime.strptime(all_fail_messages[unp]["payment_date"], "%d.%m.%Y").date()
-                if rq_pay_date > sm_pay_date:
-                    all_fail_messages[str_unp] = deliv_data
+            all_fail_messages[str_unp] = deliv_data
         os.remove(os.getenv("TEMP_SENT_FAIL_MESSAGES"))
 
         fo.save_file(data_list=all_success_messages, full_file_name=os.getenv(path_file))

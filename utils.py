@@ -55,9 +55,11 @@ def remove_message_from_success(unp=None, unp_list=None, double=None) -> None:
         for unp in unp_list:
             if unp in success_messages:
                 del success_messages[unp]
-
     fo.save_file(data_list=success_messages, full_file_name=os.getenv(success_file_name))
 
+
+def main() -> None:
+    pass
 
 if __name__ == "__main__":
     pass
