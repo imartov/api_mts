@@ -26,6 +26,7 @@ class PhoneOperations:
                     int_phone_number = "375" + int_phone_number
                     return int(int_phone_number)
                 
+        
         for separator in separators:
             if separator in phone_number:
                 phone_number = phone_number.replace(separator, ",")
@@ -51,7 +52,7 @@ class PhoneOperations:
         if not company_data["phone_number"]:
             self.update_uncorrect_phone_numbers(unp=unp, company_data=company_data)
         else:
-            valid_phone_number = self.make_valid_phone_number(phone_number=company_data["phone_number"])
+            valid_phone_number = self.make_valid_phone_number(phone_number=str(company_data["phone_number"]))
             if valid_phone_number:
                 return valid_phone_number
             else:

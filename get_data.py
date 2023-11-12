@@ -9,6 +9,7 @@ from phone import PhoneOperations
 from file_operations import FileOperations
 from utils import *
 from checking import CheckReportJobId
+from analysis import Analysis
 
 
 fo = FileOperations()
@@ -27,6 +28,7 @@ class GetData:
         wb = load_workbook(filename=os.getenv("PATH_FILE_NAME_XL"))
         ws = wb.active
         checking = CheckReportJobId()
+        analysis = Analysis()
         
         phone_operations = PhoneOperations()
         for row in ws.iter_rows(min_row=3):
@@ -45,7 +47,6 @@ class GetData:
                 "payment_date": payment_date.value,
                 "phone_number": phone_number.value
             }
-
             # if (debt sum exists and if it is more than 1 BYN and if due date equal to today or less):
             if debt_sum.value and int(debt_sum.value) >= 1 and compare_date:
                 valid_phone_number = phone_operations.check_phone_number(unp=str(unp.value),
@@ -67,8 +68,7 @@ class GetData:
             else:
                 # remove from success messages if company doesn't have debt_sum
                 remove_message_from_success(unp=str(unp.value))
-                remove_message_from_success(unp=str(unp.value), double=True)
-                    
+                remove_message_from_success(unp=str(unp.value), double=True)        
         copy_request_params = dict(self.rp.request_params)
         fo.save_data(data=copy_request_params,
                      path_to_folder=os.getenv("VIRGIN_REQ_PAR_MASS_BROAD"))

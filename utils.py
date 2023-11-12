@@ -38,7 +38,6 @@ def get_request_params_minus_messages(path_file=None,
             else:
                 rq_pay_date = datetime.strptime(recipient["payment_date"], "%d.%m.%Y").date()
                 data_pay_date = datetime.strptime(data[str_unp]["payment_date"], "%d.%m.%Y").date()
-                print(f"rq_pay_date: {rq_pay_date}, data_pay_date: {data_pay_date}")
                 if double and rq_pay_date > data_pay_date:
                     recipients.append(recipient)
         request_params["recipients"] = recipients

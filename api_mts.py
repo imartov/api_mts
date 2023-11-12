@@ -34,60 +34,54 @@ class ApiMTS:
 
     def send_message(self, by:str, request_params:dict) -> dict:
         ''' this method is for send messages as one as mass '''
-        # url = self.get_url(by=by)
-        # response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
-        # response_json = response.json()
-        # response_json["status_code"] = int(response.status_code)
-        # print('\nThe message delivering script was succesfully.')
-        # return {"http_code": int(response.status_code), "response_json": response_json}
-        pass
-    
+        url = self.get_url(by=by)
+        response = requests.post(url=url, json=request_params, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
+        response_json = response.json()
+        response_json["status_code"] = int(response.status_code)
+        print('\nThe message delivering script was succesfully.')
+        return {"http_code": int(response.status_code), "response_json": response_json}
 
     def get_report(self, by:str, var:str) -> dict:
         ''' method for get reports
          you should define "by" and "job_id" or "exrta_id" or "message_id" parametrs '''
-        # url = self.get_url(by=by, var=var)
-        # right_resp = False
-        # seconds = 0
-        # limit_seconds = 180
-        # print("Waiting response from server for get delivering report...")
-        # while not right_resp:
-        #     if seconds >= limit_seconds:
-        #         text_exception = f"The seconds count waiting for a response to receive a report has exceeded {limit_seconds} seconds."
-        #         print(text_exception)
-        #         break
-        #     else:
-        #         response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
-        #         if int(response.status_code) == 200:
-        #             right_resp = True
-        #             print("The report recieving script was succesfully.")
-        #         else:
-        #             seconds += 2
-        #             time.sleep(2)
+        url = self.get_url(by=by, var=var)
+        right_resp = False
+        seconds = 0
+        limit_seconds = 180
+        print("Waiting response from server for get delivering report...")
+        while not right_resp:
+            if seconds >= limit_seconds:
+                text_exception = f"The seconds count waiting for a response to receive a report has exceeded {limit_seconds} seconds."
+                print(text_exception)
+                break
+            else:
+                response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
+                if int(response.status_code) == 200:
+                    right_resp = True
+                    print("The report recieving script was succesfully.")
+                else:
+                    seconds += 2
+                    time.sleep(2)
 
-        # response_json = response.json()
-        # http_code = int(response.status_code)
-        # response_json["status_code"] = http_code
-        # return {"http_code": http_code, "response_json": response_json}
-        pass
-        
+        response_json = response.json()
+        http_code = int(response.status_code)
+        response_json["status_code"] = http_code
+        return {"http_code": http_code, "response_json": response_json}
 
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
          by broadcast and get report by job_id for full company '''
-        # if not request_params["recipients"]:
-        #     print("Recipients don't exist")
-        #     return
-        # _message = self.send_message(by="SM_MASS_BROADCAST", request_params=request_params)
-        # message_resp_json = _message["response_json"]
-        # job_id = message_resp_json["job_id"].strip()
-        # _report = self.get_report(by="GR_JOB_ID", var=job_id)
-        # return {"resp_message": message_resp_json,
-        #         "sm_http_code": _message["http_code"],
-        #         "resp_report": _report["response_json"],
-        #         "gr_http_code": _report["http_code"]}
-        pass
-
+        if not request_params["recipients"]:
+            print("Recipients don't exist")
+            return
+        _message = self.send_message(by="SM_MASS_BROADCAST", request_params=request_params)
+        message_resp_json = _message["response_json"]
+        job_id = message_resp_json["job_id"].strip()
+        _report = self.get_report(by="GR_JOB_ID", var=job_id)
+        return {"resp_message": message_resp_json,
+                "sm_http_code": _message["http_code"],
+                "resp_report": _report["response_json"],
+                "gr_http_code": _report["http_code"]}
     
     def send_broadcast_sync_mass_messages_and_get_report_by_message_id(self, request_params:dict) -> dict:
         ''' another popular request method for sending mass messages
