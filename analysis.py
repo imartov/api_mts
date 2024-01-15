@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Analysis():
@@ -13,9 +13,9 @@ class Analysis():
         if debt:
             self.debt_sum += float(debt)
 
-    def date_selection(self, date:str, debt:float) -> None:
-        valid_date = datetime.strptime(date, "%d.%m.%Y")
-        compare_date = datetime.strptime("06.08.2023", "%d.%m.%Y")
+    def date_selection(self, date:str, debt:str) -> None:
+        valid_date = datetime.strptime(date, "%d.%m.%Y").date()
+        compare_date = (datetime.now() - timedelta(days=30)).date()
         if valid_date >= compare_date:
             self.debtors_counting()
             self.debt_summation(debt=float(debt))

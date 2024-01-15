@@ -129,8 +129,28 @@ class ApiMTS:
 
 
 def main() -> None:
-    apimts = ApiMTS()
-    apimts.notice_report()
+    p = ApiMTS()
+    rq = {
+    "recipients": [
+        {
+            "phone_number": 375333550736,
+            "extra_id": "652d0fa4-e8ba-47d2-aaa6-b4fd816d2e48",
+        }
+    ],
+    "tag": "Debt collection",
+    "channels": [
+        "sms"
+    ],
+    "channel_options": {
+        "sms": {
+            "text": "Юля, иди домой, хватит работать!!!",
+            "alpha_name": "Alivaria",
+            "ttl": 300
+        }
+    }
+}
+    sm = p.send_message(by="SM_MASS_BROADCAST", request_params=rq)
+    print(sm)
 
 if __name__ == "__main__":
     main()

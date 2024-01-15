@@ -57,11 +57,6 @@ cacert.pem
 /cacert.pem
 *cacert.pem
 
-# py files
-runtest.py
-/runtest.py
-*runtest.py
-
 # cmd
 start.bat
 /start.bat
