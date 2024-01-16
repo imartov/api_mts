@@ -25,8 +25,8 @@ class GetData:
 
     def parse_xl(self) -> dict:
         ''' open excel file and parse it '''
-        # wb = load_workbook(filename=os.getenv("EXCEL_FILE"))
-        wb = load_workbook(filename=os.getenv("EXCEL_FILE_PROD"))
+        wb = load_workbook(filename=os.getenv("EXCEL_FILE"))
+        # wb = load_workbook(filename=os.getenv("EXCEL_FILE_PROD"))
         ws = wb.active
         checking = CheckReportJobId()
         analysis = Analysis()
@@ -44,8 +44,8 @@ class GetData:
             if not unp.value and not company_name.value and not payment_date.value:
                 break
 
-            # check if unp in stop-list
-            if removestoplist.check_if_in_list(unp=unp.value):
+            # check if unp exist
+            if not unp.value:
                 continue
             
             # check if debt sum exists
@@ -57,7 +57,10 @@ class GetData:
 
             # checking whether the debt arose in a certain period
             if not check_debt_period(payment_date=payment_date.value):
-                print(company_name.value)
+                continue
+
+            # check if unp in stop-list
+            if unp.value and removestoplist.check_if_in_list(unp=unp.value):
                 continue
 
             # check valid phone number
@@ -118,7 +121,6 @@ class RemoveStopList:
 
 def check_debt_period(payment_date, count_days=2):
     payment_date = datetime.strptime(str(payment_date), "%d.%m.%Y").date()
-    print(payment_date + timedelta(days=count_days))
     if payment_date + timedelta(days=count_days) <= datetime.now().date():
         return True
     return False

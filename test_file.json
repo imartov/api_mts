@@ -2,43 +2,11 @@
     "recipients": [
         {
             "phone_number": 375445285989,
-            "extra_id": "2f7cdbb6-9110-488a-b3de-a71d6b058eaa",
+            "extra_id": "c05162dc-ae7b-4381-a75a-23c7ed5d5c3f",
             "company_name": "Козырев Александр",
             "debt_sum": 100,
             "unp": 1916342333,
-            "payment_date": "13.01.2024"
-        },
-        {
-            "phone_number": 375445285989,
-            "extra_id": "a47c3e10-c09f-46fa-adcc-c7a5ab062f52",
-            "company_name": "Sasha",
-            "debt_sum": 200,
-            "unp": 100056428,
-            "payment_date": "13.01.2024"
-        },
-        {
-            "phone_number": 375298027982,
-            "extra_id": "72047372-72cd-4c8e-9859-6d9d5c81010a",
-            "company_name": "Ira",
-            "debt_sum": 300,
-            "unp": 1014541613,
-            "payment_date": "13.01.2024"
-        },
-        {
-            "phone_number": 375295001701,
-            "extra_id": "2287b80e-f395-44e5-a451-129743d5878f",
-            "company_name": "Vitya",
-            "debt_sum": 400,
-            "unp": 600125012,
-            "payment_date": "13.01.2024"
-        },
-        {
-            "phone_number": 375445285989,
-            "extra_id": "a3dc6cd5-a3f5-4248-9ed1-4b745d344538",
-            "company_name": "Sandra",
-            "debt_sum": 500,
-            "unp": 600125013,
-            "payment_date": "13.01.2024"
+            "payment_date": "09.01.2024"
         }
     ],
     "tag": "Debt collection",
@@ -47,7 +15,7 @@
     ],
     "channel_options": {
         "sms": {
-            "text": "Уважаемый клиент!\n%company_name% имеет задолженность за полученную по договору поставки продукцию (пиво, напитки) в сумме %debt_sum% рублей.\nВо избежание судебного взыскания, пожалуйста, погасите задолженность.\nТелефон обратной связи:\n+375172395819\n\nНапоминание о встрече в 318 каб. на 09:00",
+            "text": "Уважаемый клиент!\n%company_name% имеет задолженность за полученную по договору поставки продукцию (пиво, напитки) в сумме %debt_sum% рублей.\nВо избежание судебного взыскания, пожалуйста, погасите задолженность.\nТелефон обратной связи:\n+375172395819",
             "alpha_name": "Alivaria",
             "ttl": 300
         }

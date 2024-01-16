@@ -52,7 +52,7 @@ def runtest() -> None:
             cr.create_update_success_fail_messages(request_params=request_params, report=send_message["resp_report"])
         cr.remove_success_messages()
         cr.remove_success_messages(double=True)
-        am.notice_report()
+        # am.notice_report()
     except Exception as ex:
         am.notice_report(fail=True)
         with open("debug.txt", "w", encoding="utf-8") as file:
