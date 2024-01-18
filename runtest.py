@@ -11,7 +11,11 @@ from createrp import MassBroadcast
 from utils import get_request_params_minus_messages
 
 
+logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
+
+@logger.catch
 def runtest() -> None:
+    logger.info("Start 'runtest.runtest' method")
     try:
         load_dotenv()
         fo = FileOperations()
@@ -21,8 +25,8 @@ def runtest() -> None:
         cr = CheckReportJobId()
         
         request_params = gt.parse_xl()
-        request_params = get_request_params_minus_messages(path_file=os.getenv("PATH_UNCORRECT_PHONE_NUMBERS"),
-                                                        request_params=request_params)
+        # request_params = get_request_params_minus_messages(path_file=os.getenv("PATH_UNCORRECT_PHONE_NUMBERS"),
+        #                                                 request_params=request_params)
         request_params, double_request_params = mb.get_first_and_double_request_params(request_params=request_params, minus=True)
         
 
@@ -52,11 +56,12 @@ def runtest() -> None:
             cr.create_update_success_fail_messages(request_params=request_params, report=send_message["resp_report"])
         cr.remove_success_messages()
         cr.remove_success_messages(double=True)
-        # am.notice_report()
+        am.notice_report()
     except Exception as ex:
         am.notice_report(fail=True)
-        with open("debug.txt", "w", encoding="utf-8") as file:
-            file.write(str(ex))
+    finally:
+        fo.delete_file()
+        logger.info("End 'runtest.runtest' method")
 
 
 def main() -> None:

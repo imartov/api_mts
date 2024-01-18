@@ -2,9 +2,12 @@ import uuid, os, json, re
 from datetime import datetime
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from file_operations import FileOperations
 
+
+# logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
 
 fo = FileOperations()
 
@@ -26,6 +29,7 @@ def get_request_params_minus_messages(path_file=None,
         }
         Define double=True for saving in request_params recicpent
         if payment_date of request_params > payment_date of FIRST_SUCCESS_MESSAGES '''
+        logger.info("Start 'utils.get_request_params_minus_messages' method")
         if not request_params:
             request_params = fo.get_last_element(path_folder=os.getenv("VIRGIN_REQ_PAR_MASS_BROAD"))
         if path_file:
@@ -41,6 +45,7 @@ def get_request_params_minus_messages(path_file=None,
                 if double and rq_pay_date > data_pay_date:
                     recipients.append(recipient)
         request_params["recipients"] = recipients
+        logger.info("End 'utils.get_request_params_minus_messages' method")
         return request_params
 
 
@@ -51,7 +56,6 @@ def remove_message_from_success(unp=None, unp_list=None, double=None) -> None:
         if unp in success_messages:
             del success_messages[unp]
     if unp_list:
-        # TODO: debug
         for unp in unp_list:
             if unp in success_messages:
                 del success_messages[unp]

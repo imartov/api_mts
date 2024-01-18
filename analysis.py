@@ -26,6 +26,9 @@ class Analysis():
             self.debt_summation(debt=float(debt))
             self.debtors_counting()
 
+    def counting(self, clist:list, key:str, var:str):
+        pass
+
 
 def main() -> None:
     a = Analysis()

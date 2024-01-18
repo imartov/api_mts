@@ -2,10 +2,13 @@ import os, json
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from utils import create_extra_id, get_request_params_minus_messages
 from file_operations import FileOperations
 
+
+# logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
 
 fo = FileOperations()
 load_dotenv()
@@ -66,9 +69,10 @@ class MassBroadcast:
                 recipient["extra_id"] = create_extra_id()
             return recipients
     
-    def get_first_and_double_request_params(self, request_params:dict, days=3, minus=True) -> dict:
+    def get_first_and_double_request_params(self, request_params:dict, days=2, minus=True) -> dict:
         ''' this method returns first request_params and double request params.
         If minus=True the method will return first request_param minus double request params '''
+        logger.info("Start 'createrp.MassBroadcast.get_first_and_double_request_params' method")
         all_first_success_messages = fo.get_data_from_json_file(path_file=os.getenv("SAVE_FILE_SUCCESS_MESSAGES_FIRST"))
         check_day = datetime.today().date() - timedelta(days=days)
         minus_recipients = {}
@@ -102,8 +106,10 @@ class MassBroadcast:
             double_request_params = self.update_extra_id(request_params=double_request_params)
             double_request_params["channel_options"]["sms"]["text"] = text_message
             fo.save_data(data=double_request_params, path_to_folder=os.getenv("VIRGIN_DOUBLE_REQ_PAR_MASS_BROAD"))
+            logger.info("Start 'createrp.MassBroadcast.get_first_and_double_request_params' method")
             return request_params, double_request_params
         else:
+            logger.info("End 'createrp.MassBroadcast.get_first_and_double_request_params' method")
             return request_params, None
 
 
@@ -131,12 +137,7 @@ class OneMessage:
 
 
 def main() -> None:
-    rq = FileOperations().get_last_element(path_file="test_data\\request_params\\mass_broadcast\\first\\27_10_2023.json")
-    cr = MassBroadcast()
-    frq, drq = cr.get_first_and_double_request_params(request_params=rq)
-    
-    print("\n", frq, "\n")
-    print(drq)
+    pass
 
 if __name__ == "__main__":
     main()

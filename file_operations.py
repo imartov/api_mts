@@ -1,7 +1,11 @@
-import os, json
+import os, json, time
 import datetime
+
+from loguru import logger
 from dotenv import load_dotenv
 
+
+load_dotenv()
 
 class FileOperations:
     ''' class for save request params of sent messages '''
@@ -49,19 +53,40 @@ class FileOperations:
     def save_data_using_popular_api_methods(self, **kwargs) -> None:
         ''' this method saves data that return after using
          popular methods in api_mts.py '''
-        load_dotenv()
         for key, value in kwargs.items():
             path_to_folder = "SAVE_" + str(key).upper()
             self.save_data(data=value, path_to_folder=os.getenv(path_to_folder))
 
-    def delete_file(self, paths_to_folders:list, count_days=30) -> None:
+    def delete_file(self) -> None:
         ''' this method removes file that was created defined days ago '''
-        delete_date = datetime.datetime.now() - datetime.timedelta(days=count_days)
-        for path_to_folder in paths_to_folders:
-            delete_file_tuple = self.create_file_name_by_date(path_to_folder=path_to_folder, data=delete_date)
-            if os.path.isfile(delete_file_tuple[1]):
-                os.remove(delete_file_tuple[1])
-        # TODO: any include
+        logger.info("Start 'file_operations.FileOperations.delere_file' method")
+        check_date = (datetime.datetime.now() - datetime.timedelta(days=int(os.getenv("DAYS_DELETE_FILE")))).date()
+        paths_list = [
+            os.getenv("FOLDER_FAIL_MESSAGES"),
+            os.getenv("SAVE_FIRST_REPORTS_JOB_ID"),
+            os.getenv("SAVE_DOUBLE_REPORTS_JOB_ID"),
+            os.getenv("SAVE_REPORTS_ONE_MESSAGE"),
+            os.getenv("SAVE_RESPONSE_DATA"),
+            os.getenv("SAVE_SUCCESS_MESSAGES_FIRST"),
+            os.getenv("SAVE_SUCCESS_MESSAGES_DOUBLE"),
+            os.getenv("VIRGIN_REQ_PAR_MASS_BROAD"),
+            os.getenv("VIRGIN_DOUBLE_REQ_PAR_MASS_BROAD"),
+            os.getenv("SAVE_FIRST_REQ_PAR_MASS_BROAD"),
+            os.getenv("SAVE_DOUBLE_REQ_PAR_MASS_BROAD"),
+            os.getenv("SAVE_REQ_PAR_ONE_MESS"),
+        ]
+        exeptions = [
+            "fail_mesages.json",
+            "success_messages.json"
+        ]
+        for path in paths_list:
+            files_list = os.listdir(path)
+            for file in files_list:
+                full_path = path + "\\" + file
+                time_created = datetime.datetime.utcfromtimestamp(os.path.getctime(full_path)).date()
+                if time_created <= check_date and file not in exeptions:
+                    os.remove(full_path)
+        logger.info("End 'file_operations.FileOperations.delere_file' method")
 
     def get_last_element(self, path_folder=None, path_file=None, mylist=None) -> dict:
         if path_file:
@@ -82,8 +107,19 @@ class FileOperations:
         return messages
 
 
-def main() -> None:
-    pass
+def report_message_form(labels) -> None:
+    with open(os.getenv("JSON_REPORT_MESSAGE"), "r", encoding="utf-8") as file:
+        json_report_message = json.load(file)
+    for key, value in labels.items():
+        print(key)
+        if key in json_report_message:
+            json_report_message[key] = value
+    with open(os.getenv("JSON_REPORT_MESSAGE"), "w", encoding="utf-8") as file:
+        json.dump(json_report_message, file, indent=4, ensure_ascii=False)
 
-if __name__ == "__main":
+
+def main() -> None:
+    fo = FileOperations().delete_file()
+
+if __name__ == "__main__":
     main()

@@ -61,11 +61,7 @@ class PhoneOperations:
 
 
 def main() -> None:
-    p = PhoneOperations()
-    phone = p.make_valid_phone_number(unp="123",
-                                      company_name="Test company",
-                                      phone_number="8-017-207-49-75, 8-029-191-19-20; +37529-648-82-44")
-    print(phone)
+    pass
 
 if __name__ == "__main__":
     main()

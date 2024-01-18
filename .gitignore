@@ -61,3 +61,8 @@ cacert.pem
 start.bat
 /start.bat
 *start.bat
+
+# test
+test_file.json
+test.py
+tasks.txt

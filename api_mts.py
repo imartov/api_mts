@@ -1,12 +1,18 @@
 import os, json, time
+from datetime import datetime
 import ssl
 import certifi
 import requests
+
 from dotenv import load_dotenv
+from loguru import logger
+
 from file_operations import FileOperations
 from utils import create_extra_id
 from createrp import OneMessage
 
+
+# logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
 
 class ApiMTS:
     ''' Class for sending messages and get reports '''
@@ -47,21 +53,22 @@ class ApiMTS:
         url = self.get_url(by=by, var=var)
         right_resp = False
         seconds = 0
-        limit_seconds = 180
-        print("Waiting response from server for get delivering report...")
+        limit_seconds = 600
+        logger.info("Waiting response from server for get delivering report...")
         while not right_resp:
             if seconds >= limit_seconds:
                 text_exception = f"The seconds count waiting for a response to receive a report has exceeded {limit_seconds} seconds."
-                print(text_exception)
+                logger.info("Waiting time has expiried")
                 break
             else:
                 response = requests.get(url=url, auth=(self.LOGIN, self.PASSWORD), verify=os.getenv("PATH_CA"))
                 if int(response.status_code) == 200:
                     right_resp = True
-                    print("The report recieving script was succesfully.")
+                    logger.info("The report recieving script was succesfully")
                 else:
-                    seconds += 2
-                    time.sleep(2)
+                    seconds += 30
+                    logger.info("Waiting {seconds} seconds".format(seconds=seconds))
+                    time.sleep(30)
 
         response_json = response.json()
         http_code = int(response.status_code)
@@ -71,6 +78,7 @@ class ApiMTS:
     def send_broadcast_mass_messages_and_get_report_by_job_id(self, request_params:dict):
         ''' the popular request method for sennding mass messages using
          by broadcast and get report by job_id for full company '''
+        logger.info("Start 'api_mts.ApiMTS.send_broadcast_mass_messages_and_get_report_by_job_id' method")
         if not request_params["recipients"]:
             print("Recipients don't exist")
             return
@@ -78,6 +86,7 @@ class ApiMTS:
         message_resp_json = _message["response_json"]
         job_id = message_resp_json["job_id"].strip()
         _report = self.get_report(by="GR_JOB_ID", var=job_id)
+        logger.info("End 'api_mts.ApiMTS.send_broadcast_mass_messages_and_get_report_by_job_id' method")
         return {"resp_message": message_resp_json,
                 "sm_http_code": _message["http_code"],
                 "resp_report": _report["response_json"],
@@ -119,6 +128,10 @@ class ApiMTS:
         path_text_file_name = "NOTICE_SMS_FAIL_TEXT" if fail else "NOTICE_SMS_SUCCESS_TEXT"
         with open(os.getenv(path_text_file_name), "r", encoding="utf-8") as file:
             text = file.read()
+        with open(os.getenv("JSON_REPORT_MESSAGE"), "r", encoding="utf-8") as file:
+            labels = json.load(file)
+        if not fail:
+            text = text.format(**labels)
         onemes = OneMessage(text_message=text)
         request_params = onemes.create()
         send_message = self.send_one_message_and_get_report_by_message_id(request_params=request_params)
@@ -129,28 +142,11 @@ class ApiMTS:
 
 
 def main() -> None:
-    p = ApiMTS()
-    rq = {
-    "recipients": [
-        {
-            "phone_number": 375333550736,
-            "extra_id": "652d0fa4-e8ba-47d2-aaa6-b4fd816d2e48",
-        }
-    ],
-    "tag": "Debt collection",
-    "channels": [
-        "sms"
-    ],
-    "channel_options": {
-        "sms": {
-            "text": "Юля, иди домой, хватит работать!!!",
-            "alpha_name": "Alivaria",
-            "ttl": 300
-        }
-    }
-}
-    sm = p.send_message(by="SM_MASS_BROADCAST", request_params=rq)
-    print(sm)
+    am = ApiMTS()
+    report = am.get_report(by="GR_JOB_ID", var="a07c987a-b5e3-11ee-a22b-0050569d4780")
+    with open("test_file.json", "w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     main()

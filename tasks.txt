@@ -1,4 +1,0 @@
-Check-list:
-1. request_params = success_double_request_params
-2. request_params part equal success_double_request_params
-3. request_params full != success_double_request_params
