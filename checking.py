@@ -7,33 +7,37 @@ from loguru import logger
 from file_operations import FileOperations, report_message_form
 
 
-# logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
+success_statuses = {
+    "msg_status": 23011,
+    "substatus": 23,
+    "status": 2,
+    "status_text": "SMS delivered"
+}
+
+error_statuses = {
+    "msg_status": [36011, 35015, 36021, 36031, 12011, 36041, 36051],
+    "substatus": [10, 12, 24, 28, 35, 36],
+    "status": [1, 3]
+}
 
 report_message = {
     "count_success_first_messages": 0,
     "count_success_double_messages": 0,
     "count_unsuccess_first_messages": 0,
-    "count_unsuccess_double_messages": 0,
-    "all_success_messages": 0,
-    "all_unsuccess_messages": 0,
-    "percent_success_messages": 0
+    "count_unsuccess_double_messages": 0
 }
 
+# logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
 fo = FileOperations()
+load_dotenv()
 
 class CheckReportJobId:
     ''' this class is for checking reports and finding error messages '''
     def __init__(self) -> None:
-        self.error_code_status = (1, 3)
-        self.error_code_substatus = (10, 12, 24, 28, 35, 36)
-        self.error_code_msg_status = (36011, 35015, 36021, 36031, 12011, 36041, 36051)
-        load_dotenv()
+        pass
     
-    def create_update_success_fail_messages(self,
-                                            request_params=None,
-                                            report=None,
-                                            double=False,
-                                            days=2) -> None:
+    def create_update_success_fail_messages(self, request_params=None,
+                                            report=None, double=False) -> None:
         ''' this method checks request_params and reports and
         define success messages and fail messages and:
         1. rewrite success_messages.json
@@ -46,14 +50,13 @@ class CheckReportJobId:
         If double=True this method is apply for double delivering '''
 
         logger.info("Start 'checking.CheckReportJobId.create_update_success_fail_messages' method")
-        path_reqpar = "SAVE_DOUBLE_REQ_PAR_MASS_BROAD" if double else "SAVE_FIRST_REQ_PAR_MASS_BROAD"
-        path_report = "SAVE_DOUBLE_REPORTS_JOB_ID" if double else "SAVE_FIRST_REPORTS_JOB_ID"
-
         if not request_params:
+            path_reqpar = "SAVE_DOUBLE_REQ_PAR_MASS_BROAD" if double else "SAVE_FIRST_REQ_PAR_MASS_BROAD"
             request_params = fo.get_last_element(path_to_folder=os.getenv(path_reqpar))
             if not request_params:
                 return
         if not report:
+            path_report = "SAVE_DOUBLE_REPORTS_JOB_ID" if double else "SAVE_FIRST_REPORTS_JOB_ID"
             report = fo.get_last_element(path_to_folder=os.getenv(path_report))
             if not report:
                 return
@@ -61,7 +64,6 @@ class CheckReportJobId:
         last_message_time = datetime.strftime(datetime.fromtimestamp(report["messages"][-1]["time"] / 1000),
                                               fo.strftime_datatime_format)
         date_time = request_params["datetime"] if "datetime" in request_params else last_message_time
-        # check_day = datetime.strptime(date_time, fo.strftime_datatime_format).date() - timedelta(days=days)
 
         temp_success_messages = {}
         temp_fail_messages = {}
@@ -71,8 +73,7 @@ class CheckReportJobId:
                 str_unp = str(recipient["unp"])
                 if message["extra_id"] == recipient["extra_id"]:
                     # save success messages
-                    if (("status_text" in message and message["status_text"] == "SMS delivered") and
-                        ("msg_status" in message and message["msg_status"] == 23011)):
+                    if self.check_success_status(msg_report=message):
                         temp_success_messages[str_unp] = {
                             "company_name": recipient["company_name"],
                             "payment_date": recipient["payment_date"],
@@ -81,17 +82,21 @@ class CheckReportJobId:
                             "delivering_date": date_time
                         }
                     # save fail messages
-                    else: # TODO: добавить код ошибки и сообщение об ошибке
+                    else:
                         temp_fail_messages[str_unp] = {
                             "company_name": recipient["company_name"],
                             "payment_date": recipient["payment_date"],
                             "phone_number": recipient["phone_number"],
                             "extra_id": recipient["extra_id"],
+                            "error_code": message["error_code"],
                             "delivering_date": date_time
                         }
 
         fo.save_file(data_list=temp_success_messages, full_file_name=os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
         fo.save_file(data_list=temp_fail_messages, full_file_name=os.getenv("TEMP_SENT_FAIL_MESSAGES"))
+
+        count_success = len(temp_success_messages)
+        count_fail = len(temp_fail_messages)
 
         path_save = "SAVE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_SUCCESS_MESSAGES_FIRST"
         path_file = "SAVE_FILE_SUCCESS_MESSAGES_DOUBLE" if double else "SAVE_FILE_SUCCESS_MESSAGES_FIRST"
@@ -99,27 +104,25 @@ class CheckReportJobId:
         # pass, update and delete all_success_messages (success_messages.json)
         all_success_messages = fo.get_data_from_json_file(path_file=os.getenv(path_file))
         for unp, deliv_data in temp_success_messages.items():
-
+            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv(path_save))
+            all_success_messages[unp] = deliv_data
+            
             if double:
                 report_message["count_success_double_messages"] += 1
             else:
                 report_message["count_success_first_messages"] += 1
-
-            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv(path_save))
-            all_success_messages[unp] = deliv_data
         os.remove(os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
         
         all_fail_messages = fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
         for unp, deliv_data in temp_fail_messages.items():
+            # write into file by date fail messages (create file)
+            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
+            all_fail_messages[str_unp] = deliv_data
 
             if double:
                 report_message["count_unsuccess_double_messages"] += 1
             else:
                 report_message["count_unsuccess_first_messages"] += 1
-
-            # write into file by date fail messages (create file)
-            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
-            all_fail_messages[str_unp] = deliv_data
         os.remove(os.getenv("TEMP_SENT_FAIL_MESSAGES"))
 
         fo.save_file(data_list=all_success_messages, full_file_name=os.getenv(path_file))
@@ -128,11 +131,9 @@ class CheckReportJobId:
         # form of report message
         report_message["all_success_messages"] = report_message["count_success_first_messages"] + report_message["count_success_double_messages"]
         report_message["all_unsuccess_messages"] = report_message["count_unsuccess_first_messages"] + report_message["count_unsuccess_double_messages"]
-        with open(os.getenv("JSON_REPORT_MESSAGE"), "r", encoding="utf-8") as file:
-            debtor_count_will_send_message = json.load(file)["debtor_count_will_send_message"]
-        report_message["percent_success_messages"] = report_message["all_success_messages"] / debtor_count_will_send_message * 100
         report_message_form(labels=report_message)
         logger.info("End 'checking.CheckReportJobId.create_update_success_fail_messages' method")
+        return count_success, count_fail
 
 
     def check_exist_success_message(self, unp:str, payment_date:str, days=2, double=None) -> bool:
@@ -170,10 +171,62 @@ class CheckReportJobId:
             if unp in success_messages_remove:
                 deliv_date_save = datetime.strptime(success_data_save["delivering_date"], fo.strftime_datatime_format).date()
                 deliv_date_remove = datetime.strptime(success_messages_remove[unp]["delivering_date"], fo.strftime_datatime_format).date()
-                if deliv_date_save > deliv_date_remove:
+                payment_date_save = datetime.strptime(success_data_save["payment_date"], "%d.%m.%Y").date()
+                payment_date_remove = datetime.strptime(success_messages_remove[unp]["payment_date"], "%d.%m.%Y").date()
+                if deliv_date_save > deliv_date_remove or payment_date_save > payment_date_remove:
                     del success_messages_remove[unp]
         fo.save_file(data_list=success_messages_remove, full_file_name=os.getenv(path_success_file_name_remove))
         logger.info("End 'checking.CheckReportJobId.remove_success_messages' method")
+
+
+    def check_success_status(self, msg_report:dict) -> bool:
+        ''' метод проверяет статус доставки сообщения
+        при успешной доставке метод возвращает True, иначе - None '''
+        if "msg_status" in msg_report and "substatus" in msg_report and "status" in msg_report:
+            if msg_report["msg_status"] == success_statuses["msg_status"] and\
+            msg_report["substatus"] == success_statuses["substatus"] and\
+            msg_report["status"] == success_statuses["status"]:
+                return True
+        return
+    
+
+    def check_error_status(self, msg_report:dict) -> bool:
+        ''' метод проверяет статус доставки сообщения
+        при неуспешной доставке метод возвращает True, иначе - None '''
+        if "error_code" in msg_report:
+            return True
+        return
+
+    
+    def check_count_messages(self, messages:list, recipients=None, double=False) -> bool:
+        ''' this method checks if count of recipients equal count of messages of report
+            the method will return False if values not equal and True if equal
+        '''
+        logger.info("Start 'checking.CheckReportJobId.check_count_messages' method")
+        if not recipients:
+            path_folder = os.getenv("SAVE_DOUBLE_REQ_PAR_MASS_BROAD") if double else os.getenv("SAVE_FIRST_REQ_PAR_MASS_BROAD")
+            recipients = fo.get_last_element(path_folder=path_folder)["recipients"]
+        logger.info("End 'checking.CheckReportJobId.check_count_messages' method")
+        if len(messages) != len(recipients):
+            return False
+        return True
+
+    def get_missing_messages(self, messages:list, recipients=None, double=False) -> list:
+        if not recipients:
+            path_folder = os.getenv("SAVE_DOUBLE_REQ_PAR_MASS_BROAD") if double else os.getenv("SAVE_FIRST_REQ_PAR_MASS_BROAD")
+            recipients = fo.get_last_element(path_folder=path_folder)["recipients"]
+        messages_extra_id_list = []
+        recipients_extra_id_list = []
+        for recipient in recipients:
+            recipients_extra_id_list.append(recipient["extra_id"])
+        for message in messages:
+            messages_extra_id_list.append(message["extra_id"])
+        missing_extra_id_list = []
+        for recipient_extra_id in recipients_extra_id_list:
+            if recipient_extra_id not in messages_extra_id_list:
+                missing_extra_id_list.append(recipient_extra_id)
+        print(len(missing_extra_id_list))
+        return missing_extra_id_list
 
 
 class CheckRequestParams:

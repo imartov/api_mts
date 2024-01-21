@@ -22,9 +22,7 @@ report_message = {
     "debtor_count_valid_number": 0,
     "debtor_count_unvalid_number": 0,
     "debt_sum_valid_number": 0,
-    "debt_sum_unvalid_number": 0,
-    "debtor_count_will_send_message": 0,
-    "debt_sum_will_send_message": 0
+    "debt_sum_unvalid_number": 0
 }
 
 fo = FileOperations()
@@ -41,8 +39,8 @@ class GetData:
     def parse_xl(self) -> dict:
         ''' open excel file and parse it '''
         logger.info("Start 'get_data.FileOperations.parse_xl' method")
-        wb = load_workbook(filename=os.getenv("EXCEL_FILE"))
-        # wb = load_workbook(filename=os.getenv("EXCEL_FILE_PROD"))
+        # wb = load_workbook(filename=os.getenv("EXCEL_FILE"))
+        wb = load_workbook(filename=os.getenv("EXCEL_FILE_PROD"))
         ws = wb.active
         checking = CheckReportJobId()
         analysis = Analysis()
@@ -115,8 +113,6 @@ class GetData:
                 )
                 # pass debtors to virgin request params
                 if not exist_first and not exist_double:
-                    report_message["debtor_count_will_send_message"] += 1
-                    report_message["debt_sum_will_send_message"] += int(debt_sum.value)
                     self.rp.create(
                         phone_number=valid_phone_number,
                         company_name=company_name.value,
@@ -127,10 +123,10 @@ class GetData:
             else:
                 report_message["debtor_count_unvalid_number"] += 1
                 report_message["debt_sum_unvalid_number"] += int(debt_sum.value)
-                       
+                    
         copy_request_params = dict(self.rp.request_params)
         fo.save_data(data=copy_request_params,
-                     path_to_folder=os.getenv("VIRGIN_REQ_PAR_MASS_BROAD"))
+                    path_to_folder=os.getenv("VIRGIN_REQ_PAR_MASS_BROAD"))
         with open("test_file.json", "w", encoding="utf-8") as file:
             json.dump(self.rp.request_params, file, indent=4, ensure_ascii=False)
         report_message_form(labels=report_message)
@@ -190,6 +186,7 @@ def check_debt_period(payment_date, count_days=2):
 
 def main() -> None:
     rq = GetData().parse_xl()
+    print(rq)
 
 if __name__ == "__main__":
     main()

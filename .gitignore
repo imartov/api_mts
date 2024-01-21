@@ -42,6 +42,8 @@ __pycache__
 debug.log
 .log
 /debug.log
+debug/
+debug.py
 
 # zip files
 *.zip

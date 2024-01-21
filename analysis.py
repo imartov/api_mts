@@ -26,8 +26,10 @@ class Analysis():
             self.debt_summation(debt=float(debt))
             self.debtors_counting()
 
-    def counting(self, clist:list, key:str, var:str):
-        pass
+    def counting_sum_from_recipients(self, recipients:list) -> int:
+        for recipient in recipients:
+            self.debt_sum += recipient["debt_sum"]
+        return self.debt_sum
 
 
 def main() -> None:

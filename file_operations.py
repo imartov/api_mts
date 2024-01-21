@@ -2,6 +2,8 @@ import os, json, time
 import datetime
 
 from loguru import logger
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
 from dotenv import load_dotenv
 
 
@@ -88,7 +90,7 @@ class FileOperations:
                     os.remove(full_path)
         logger.info("End 'file_operations.FileOperations.delere_file' method")
 
-    def get_last_element(self, path_folder=None, path_file=None, mylist=None) -> dict:
+    def get_last_element(self, path_folder:str, path_file=None, mylist=None) -> dict:
         if path_file:
             data = self.get_data_from_json_file(path_file=path_file).pop()
             return data
@@ -105,21 +107,59 @@ class FileOperations:
         with open(path_file, "r", encoding="utf-8") as file:
             messages = json.load(file)
         return messages
+    
+    def check_modified_date(self, path:str) -> bool:
+        logger.info("Start 'file_operations/FileOperations.check_modified_date' method")
+        modified_date = datetime.datetime.utcfromtimestamp(os.path.getmtime(path)).date()
+        logger.info("End 'file_operations/FileOperations.check_modified_date' method")
+        if modified_date != datetime.datetime.now().date():
+            return
+        return True
+    
+    def get_files_list_in_folder(self, env:str) -> list:
+        file_list = []
+        for file in os.listdir(os.getenv(env)):
+            full_file_name = os.getenv(env) + "\\" + file
+            file_list.append(full_file_name)
+        return file_list
+    
+    @logger.catch
+    def create_excel_file_of_invalid_phone_numbers(self, unp_dict:dict) -> None:
+        if not os.path.isfile(os.getenv("PATH_UNCORRECT_PHONE_NUMBERS")):
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "invalid_phones"
+            ws.append(["УНП", "ИМЯ", "ТЕЛЕФОН", "ДАТА ВОЗН. ЗАДОЛЖЕННОСТИ"])
+            ft = Font(bold=True)
+            for row in ws["A1:D1"]:
+                for cell in row:
+                    cell.font = ft
+        else:
+            wb = load_workbook(filename=os.getenv("INVALID_PHONES"))
+            ws = wb.active
+        # invalid_phone_numbers = self.get_data_from_json_file(path_file=os.getenv("PATH_UNCORRECT_PHONE_NUMBERS"))
+        # for unp, company_data in invalid_phone_numbers.items():
+            # ws.append([unp, company_data["company_name"], company_data["phone_number"], company_data["payment_date"]])
+        ws.append(["test", "test", "test", "test"])
+        wb.save(os.getenv("INVALID_PHONES"))
+    
+    # TODO: get file by last created date
 
 
 def report_message_form(labels) -> None:
     with open(os.getenv("JSON_REPORT_MESSAGE"), "r", encoding="utf-8") as file:
         json_report_message = json.load(file)
     for key, value in labels.items():
-        print(key)
         if key in json_report_message:
             json_report_message[key] = value
     with open(os.getenv("JSON_REPORT_MESSAGE"), "w", encoding="utf-8") as file:
         json.dump(json_report_message, file, indent=4, ensure_ascii=False)
 
 
+
+
 def main() -> None:
-    fo = FileOperations().delete_file()
+    fo = FileOperations().create_excel_file_of_invalid_phone_numbers()
 
 if __name__ == "__main__":
     main()
