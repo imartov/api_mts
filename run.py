@@ -11,7 +11,7 @@ from createrp import OneMessage
 
 
 # add logger
-logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 KB', compression='zip')
+# logger.add('debug.log', format='{time} {level} {message}', level='DEBUG', rotation='100 KB', compression='zip')
 
 
 class Run:

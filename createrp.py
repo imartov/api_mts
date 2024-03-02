@@ -58,6 +58,11 @@ class MassBroadcast:
             self.request_params["recipients"].append(recipient)
         return self.request_params
     
+    
+    def empty_create(self, **kwargs) -> dict:
+        return self.request_params
+    
+
     def update_extra_id(self, request_params=None, recipients=None):
         ''' this method updates extra_id in list of recipients '''
         if request_params:

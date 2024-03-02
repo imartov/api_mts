@@ -1,5 +1,10 @@
 from datetime import datetime, timedelta
+import os, json
 
+from file_operations import FileOperations
+
+
+fo = FileOperations()
 
 class Analysis():
     def __init__(self) -> None:
@@ -30,6 +35,22 @@ class Analysis():
         for recipient in recipients:
             self.debt_sum += recipient["debt_sum"]
         return self.debt_sum
+    
+    def update_daily_stat(self) -> None:
+        file_name, full_file_name = fo.create_file_name_by_date(path_to_folder=os.getenv("FOLDER_STAT"))
+        daily_stat = fo.get_data_from_json_file(path_file=os.getenv("JSON_REPORT_MESSAGE"))
+        with open(full_file_name, "w", encoding="utf-8") as file:
+            json.dump(daily_stat, file, indent=4, ensure_ascii=False)
+        today_stat = {}
+        key = file_name.replace(".json", "")
+        today_stat[key] = daily_stat
+        with open(os.getenv("STAT_FILE"), "r", encoding="utf-8") as file:
+            all_daily_stat = json.load(file)
+        all_daily_stat.update(today_stat)
+        with open(full_file_name, "w", encoding="utf-8") as file:
+            json.dump(all_daily_stat, file, indent=4, ensure_ascii=False)
+
+
 
 
 def main() -> None:

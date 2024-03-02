@@ -9,6 +9,10 @@ load_dotenv()
 class PhoneOperations:
 
     def __init__(self) -> None:
+        self.correct_phones_unp_list = []
+        pass
+
+    def __del__(self) -> None:
         pass
     
     def make_valid_phone_number(self, phone_number:str):
@@ -25,7 +29,6 @@ class PhoneOperations:
                 if int_phone_number[:2] in operators_codes:
                     int_phone_number = "375" + int_phone_number
                     return int(int_phone_number)
-                
         
         for separator in separators:
             if separator in phone_number:
@@ -54,6 +57,8 @@ class PhoneOperations:
         else:
             valid_phone_number = self.make_valid_phone_number(phone_number=str(company_data["phone_number"]))
             if valid_phone_number:
+                if unp not in self.correct_phones_unp_list:
+                    self.correct_phones_unp_list.append(unp) 
                 return valid_phone_number
             else:
                 self.update_uncorrect_phone_numbers(unp=unp, company_data=company_data)

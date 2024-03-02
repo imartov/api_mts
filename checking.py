@@ -20,13 +20,6 @@ error_statuses = {
     "status": [1, 3]
 }
 
-report_message = {
-    "count_success_first_messages": 0,
-    "count_success_double_messages": 0,
-    "count_unsuccess_first_messages": 0,
-    "count_unsuccess_double_messages": 0
-}
-
 # logger.add("debug.log", format='{time} | {level} | {file} | {name} | {function} | {line} | {message}', level='DEBUG', rotation='1 week', compression='zip')
 fo = FileOperations()
 load_dotenv()
@@ -88,7 +81,6 @@ class CheckReportJobId:
                             "payment_date": recipient["payment_date"],
                             "phone_number": recipient["phone_number"],
                             "extra_id": recipient["extra_id"],
-                            "error_code": message["error_code"],
                             "delivering_date": date_time
                         }
 
@@ -103,35 +95,19 @@ class CheckReportJobId:
 
         # pass, update and delete all_success_messages (success_messages.json)
         all_success_messages = fo.get_data_from_json_file(path_file=os.getenv(path_file))
-        for unp, deliv_data in temp_success_messages.items():
-            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv(path_save))
-            all_success_messages[unp] = deliv_data
-            
-            if double:
-                report_message["count_success_double_messages"] += 1
-            else:
-                report_message["count_success_first_messages"] += 1
+        all_success_messages.update(temp_success_messages)
+        with open(os.getenv(path_file), "w", encoding="utf-8") as file:
+            json.dump(all_success_messages, file, indent=4, ensure_ascii=False)
+        fo.save_data(data=temp_success_messages, path_to_folder=os.getenv(path_save))
         os.remove(os.getenv("TEMP_SENT_SUCCESS_MESSAGES"))
         
+        # pass, update and delete all_fail_messages
         all_fail_messages = fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
-        for unp, deliv_data in temp_fail_messages.items():
-            # write into file by date fail messages (create file)
-            fo.save_data(data={unp: deliv_data}, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
-            all_fail_messages[str_unp] = deliv_data
-
-            if double:
-                report_message["count_unsuccess_double_messages"] += 1
-            else:
-                report_message["count_unsuccess_first_messages"] += 1
+        all_fail_messages.update(temp_fail_messages)
+        with open(os.getenv("FILE_FAIL_MESSAGES"), "w", encoding="utf-8") as file:
+            json.dump(all_fail_messages, file, indent=4, ensure_ascii=False)
+        fo.save_data(data=temp_fail_messages, path_to_folder=os.getenv("FOLDER_FAIL_MESSAGES"))
         os.remove(os.getenv("TEMP_SENT_FAIL_MESSAGES"))
-
-        fo.save_file(data_list=all_success_messages, full_file_name=os.getenv(path_file))
-        fo.save_file(data_list=all_fail_messages, full_file_name=os.getenv("FILE_FAIL_MESSAGES"))
-
-        # form of report message
-        report_message["all_success_messages"] = report_message["count_success_first_messages"] + report_message["count_success_double_messages"]
-        report_message["all_unsuccess_messages"] = report_message["count_unsuccess_first_messages"] + report_message["count_unsuccess_double_messages"]
-        report_message_form(labels=report_message)
         logger.info("End 'checking.CheckReportJobId.create_update_success_fail_messages' method")
         return count_success, count_fail
 

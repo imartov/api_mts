@@ -18,7 +18,7 @@ class RepitCheckFailMessagesAndSaveIfSuccess:
     def __init__(self) -> None:
         pass
 
-    def get_extra_ids_from_fail_messages(self) -> list:
+    def get_extra_ids_from_daily_fail_messages(self) -> list:
         ''' метод формирует и возвращает список из extra_id сообщений,
         завершившихся с ошибкой '''
         logger.info("Start")
@@ -33,6 +33,15 @@ class RepitCheckFailMessagesAndSaveIfSuccess:
                     for unp_key, company_data in message.items():
                         if unp_key != "datetime":
                             extra_ids_list.append(message[unp_key]["extra_id"])
+        logger.info("End")
+        return extra_ids_list
+    
+    def get_extra_ids_from_fail_messages(self) -> list:
+        logger.info("Start")
+        success_messages = fo.get_data_from_json_file(path_file=os.getenv("FILE_FAIL_MESSAGES"))
+        extra_ids_list = []
+        for unp, company_data in success_messages.items():
+            extra_ids_list.append(company_data["extra_id"])
         logger.info("End")
         return extra_ids_list
 
