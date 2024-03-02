@@ -57,7 +57,6 @@ class Report:
         if send_message:
             fo.save_data(data=send_message["resp_message"], path_to_folder=os.getenv("SAVE_RESPONSE_DATA"))
             fo.save_data(data=send_message["resp_report"], path_to_folder=os.getenv("SAVE_FIRST_REPORTS_JOB_ID"))
-            count_success, count_fail = cr.create_update_success_fail_messages(request_params=request_params, report=send_message["resp_report"])
 
 
 def main() -> None:
