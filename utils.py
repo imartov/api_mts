@@ -99,7 +99,7 @@ class CreateUpdateInvalidXlsFile:
         ws = wb.active
         column_list = []
         for cell in ws[col]:
-            column_list.append(cell.value)
+            column_list.append(str(cell.value))
         return column_list
 
     def get_unps_not_exist_in_file(self, path:str, col:str, unp_list:list) -> list:
@@ -147,6 +147,7 @@ class CreateUpdateInvalidXlsFile:
         ''' метод определяет порядок вызова функций для создания и обновления файла '''
         invalid_phones = fo.get_data_from_json_file(path_file=path_from)
         unp_list_invalid_phones = list(invalid_phones.keys())
+        # unp_list_invalid_phones = [int(i) for i in unp_list_invalid_phones if i != "None"]
         if not self.check_if_file_exist(path=path_to):
             self.create_file_if_not_exist(path=path_to, sheet_name=sheet_name,
                                           headers=["УНП", "ИМЯ", "ТЕЛЕФОН", "ДАТА ВОЗН. ЗАДОЛЖЕННОСТИ"])
@@ -174,8 +175,7 @@ class CreateUpdateInvalidXlsFile:
 
 @logger.catch
 def main() -> None:
-    invphones = CreateUpdateInvalidXlsFile()
-    invphones.create_update_invalid_phones()
+    pass
 
 if __name__ == "__main__":
     main()
